@@ -38,26 +38,19 @@ export function createPanel(container, params, onChange) {
   createControl(container, 'Altezza', 'canvasHeight', 'number', 100, 5000);
 
   const shapeTitle = document.createElement('h2');
-  shapeTitle.textContent = 'Forma';
+  shapeTitle.textContent = 'Forma base';
   container.appendChild(shapeTitle);
-  createControl(container, 'R1 Semi-larghezza', 'r1Width', 'number', 10, 500);
-  createControl(container, 'R1 Semi-altezza', 'r1Height', 'number', 10, 500);
-  createControl(container, 'Scala R2 (%)', 'scaleR2', 'number', 10, 99);
-  createControl(container, 'Scala R3 (%)', 'scaleR3', 'number', 10, 99);
+  createControl(container, 'Semi-larghezza', 'baseWidth', 'number', 10, 500);
+  createControl(container, 'Semi-altezza', 'baseHeight', 'number', 10, 500);
+  createControl(container, 'Medio (%)', 'scaleMedium', 'number', 110, 300);
+  createControl(container, 'Grande (%)', 'scaleLarge', 'number', 110, 300);
 
   const gridTitle = document.createElement('h2');
   gridTitle.textContent = 'Griglia';
   container.appendChild(gridTitle);
-  createControl(container, 'Gap Orizzontale', 'gapH', 'number', 0, 200);
-  createControl(container, 'Gap Verticale', 'gapV', 'number', 0, 200);
+  createControl(container, 'Colonne', 'cols', 'number', 1, 50);
+  createControl(container, 'Righe', 'rows', 'number', 1, 50);
 
-  const marginTitle = document.createElement('h2');
-  marginTitle.textContent = 'Margini';
-  container.appendChild(marginTitle);
-  createControl(container, 'Superiore', 'marginTop', 'number', 0, 500);
-  createControl(container, 'Destro', 'marginRight', 'number', 0, 500);
-  createControl(container, 'Inferiore', 'marginBottom', 'number', 0, 500);
-  createControl(container, 'Sinistro', 'marginLeft', 'number', 0, 500);
 
   const styleTitle = document.createElement('h2');
   styleTitle.textContent = 'Stile';

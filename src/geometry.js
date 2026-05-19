@@ -7,41 +7,37 @@ export function computeRhombusVertices(cx, cy, rx, ry) {
   ];
 }
 
-export function computeGroup(cx, cy, rx, ry, scaleR2, scaleR3) {
-  const s2 = scaleR2 / 100;
-  const s3 = scaleR3 / 100;
+export function computeGroup(cx, cy, baseRx, baseRy, scaleMedium, scaleLarge) {
+  const sm = scaleMedium / 100;
+  const sl = scaleLarge / 100;
   return [
-    { vertices: computeRhombusVertices(cx, cy, rx, ry), level: 0 },
-    { vertices: computeRhombusVertices(cx, cy, rx * s2, ry * s2), level: 1 },
-    { vertices: computeRhombusVertices(cx, cy, rx * s2 * s3, ry * s2 * s3), level: 2 },
+    { vertices: computeRhombusVertices(cx, cy, baseRx * sl, baseRy * sl), level: 0 },
+    { vertices: computeRhombusVertices(cx, cy, baseRx * sm, baseRy * sm), level: 1 },
+    { vertices: computeRhombusVertices(cx, cy, baseRx, baseRy), level: 2 },
   ];
 }
 
 export function computeGrid(params) {
-  const { canvasWidth, canvasHeight, r1Width, r1Height, scaleR2, scaleR3, gapH, gapV, marginTop, marginRight, marginBottom, marginLeft } = params;
-  const s2 = scaleR2 / 100;
+  const { cols, rows, canvasWidth, canvasHeight, baseWidth, baseHeight, scaleMedium, scaleLarge } = params;
+  const sm = scaleMedium / 100;
+  const sl = scaleLarge / 100;
 
-  const hStep = r1Width * (1 + s2) + gapH;
-  const vStep = r1Height * (1 + s2) + gapV;
-  const rightBound = canvasWidth - marginRight + r1Width * 4;
-  const bottomBound = canvasHeight - marginBottom + r1Height * 4;
+  const rxLarge = baseWidth * sl;
+  const ryLarge = baseHeight * sl;
 
-  const rows = [];
-  let rowOrigin = { x: marginLeft + r1Width, y: marginTop + r1Height };
+  const hStep = cols > 1 ? (canvasWidth - 2 * rxLarge) / (cols - 1) : 0;
+  const vStep = rows > 1 ? (canvasHeight - 2 * ryLarge) / (rows - 1) : 0;
 
-  while (rowOrigin.y < bottomBound) {
+  const groups = [];
+  for (let r = 0; r < rows; r++) {
     const row = [];
-    let cx = rowOrigin.x;
-
-    while (cx < rightBound) {
-      const group = computeGroup(cx, rowOrigin.y, r1Width, r1Height, scaleR2, scaleR3);
-      row.push(group);
-      cx += hStep;
+    for (let c = 0; c < cols; c++) {
+      const cx = rxLarge + c * hStep;
+      const cy = ryLarge + r * vStep;
+      row.push(computeGroup(cx, cy, baseWidth, baseHeight, scaleMedium, scaleLarge));
     }
-
-    if (row.length > 0) rows.push(row);
-    rowOrigin.y += vStep;
+    groups.push(row);
   }
 
-  return rows;
+  return groups;
 }
