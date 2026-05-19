@@ -27,7 +27,7 @@ export function computeGrid(params) {
   const bottomBound = canvasHeight - marginBottom + r1Height * 4;
 
   const rows = [];
-  let rowOrigin = { x: marginLeft, y: marginTop };
+  let rowOrigin = { x: marginLeft + r1Width, y: marginTop + r1Height };
 
   while (rowOrigin.y < bottomBound) {
     const row = [];
