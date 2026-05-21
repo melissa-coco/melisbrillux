@@ -250,29 +250,6 @@ function exportVideo() {
 }
 
 // === Font Loading ===
-function loadFont(family) {
-  return new Promise((resolve) => {
-    const isSystemFont = family === 'Times New Roman'
-    if (isSystemFont) {
-      resolve()
-      return
-    }
-    const link = document.createElement('link')
-    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:wght@400;700&display=swap`
-    link.rel = 'stylesheet'
-    document.head.appendChild(link)
-    const checkFont = () => {
-      if (document.fonts.check(`1em "${family}"`)) {
-        resolve()
-      } else {
-        setTimeout(checkFont, 100)
-      }
-    }
-    checkFont()
-    setTimeout(resolve, 5000)
-  })
-}
-
 // === Controls ===
 const controlsEl = document.getElementById('controls')
 
@@ -348,9 +325,8 @@ function setupControls() {
     textNeedsRedraw = true
   })
 
-  document.getElementById('font-select').addEventListener('change', async e => {
+  document.getElementById('font-select').addEventListener('change', e => {
     state.font = e.target.value
-    await loadFont(state.font)
     textNeedsRedraw = true
   })
 
@@ -429,7 +405,7 @@ langBtn.addEventListener('click', () => {
 applyLang(lang)
 
 // === Init ===
-loadFont(state.font).then(() => {
+document.fonts.ready.then(() => {
   textNeedsRedraw = true
 })
 updateBackground()
