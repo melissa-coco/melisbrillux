@@ -6,7 +6,7 @@ const state = {
   font: 'Lato',
   color: '#FF6B6B',
   fillOpacity: 1.0,
-  strokeWidth: 2,
+  strokeWidth: 5,
   strokeColor: '#FFFFFF',
   strokeOpacity: 1.0,
   noiseIntensity: 0.45,
@@ -264,7 +264,6 @@ function buildControls() {
       <select id="font-select">
         <option value="Lato" ${state.font === 'Lato' ? 'selected' : ''}>Lato</option>
         <option value="Times New Roman" ${state.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
-        <option value="Lobster" ${state.font === 'Lobster' ? 'selected' : ''}>Lobster</option>
       </select>
     </div>
     <div class="control-group">
