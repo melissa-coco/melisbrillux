@@ -263,10 +263,7 @@ function buildControls() {
       <label for="font-select">Font</label>
       <select id="font-select">
         <option value="Lato" ${state.font === 'Lato' ? 'selected' : ''}>Lato</option>
-        <option value="Roboto" ${state.font === 'Roboto' ? 'selected' : ''}>Roboto</option>
         <option value="Times New Roman" ${state.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
-        <option value="Montserrat" ${state.font === 'Montserrat' ? 'selected' : ''}>Montserrat</option>
-        <option value="Lobster" ${state.font === 'Lobster' ? 'selected' : ''}>Lobster</option>
       </select>
     </div>
     <div class="control-group">
