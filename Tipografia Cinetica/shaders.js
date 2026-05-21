@@ -24,6 +24,8 @@ uniform float uNoiseIntensity;
 uniform float uSpeed;
 uniform vec3 uColor;
 uniform vec3 uStrokeColor;
+uniform float uFillOpacity;
+uniform float uStrokeOpacity;
 
 // Simplex noise 3D — Stefan Gustavson / Ashima Arts
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -102,15 +104,19 @@ void main() {
   float isFill = texColor.r;
   float isStroke = texColor.g;
   vec3 finalColor;
+  float alpha = texColor.a;
   if (isFill > 0.3) {
     finalColor = uColor;
+    alpha *= uFillOpacity;
   } else if (isStroke > 0.3) {
     finalColor = uStrokeColor;
+    alpha *= uStrokeOpacity;
   } else {
     finalColor = uColor;
+    alpha *= uFillOpacity;
   }
 
-  fragColor = vec4(finalColor, texColor.a);
+  fragColor = vec4(finalColor, alpha);
 }
 `
 

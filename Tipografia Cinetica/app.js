@@ -5,8 +5,10 @@ const state = {
   word: 'SHAKE',
   font: 'Lato',
   color: '#FF6B6B',
+  fillOpacity: 1.0,
   strokeWidth: 2,
   strokeColor: '#FFFFFF',
+  strokeOpacity: 1.0,
   noiseIntensity: 0.8,
   speed: 1.5,
 }
@@ -61,6 +63,8 @@ function initShaders() {
     uSpeed: gl.getUniformLocation(program, 'uSpeed'),
     uColor: gl.getUniformLocation(program, 'uColor'),
     uStrokeColor: gl.getUniformLocation(program, 'uStrokeColor'),
+    uFillOpacity: gl.getUniformLocation(program, 'uFillOpacity'),
+    uStrokeOpacity: gl.getUniformLocation(program, 'uStrokeOpacity'),
   }
 }
 
@@ -186,6 +190,8 @@ function loop() {
   gl.uniform3f(uLocations.uColor, r, g, b)
   const [sr, sg, sb] = hexToRgb(state.strokeColor)
   gl.uniform3f(uLocations.uStrokeColor, sr, sg, sb)
+  gl.uniform1f(uLocations.uFillOpacity, state.fillOpacity)
+  gl.uniform1f(uLocations.uStrokeOpacity, state.strokeOpacity)
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
@@ -237,6 +243,14 @@ function buildControls() {
       <input type="range" id="stroke-width-slider" min="0" max="10" step="1" value="${state.strokeWidth}">
     </div>
     <div class="control-group">
+      <label for="fill-opacity-slider">Opacità riempimento: <span id="fill-opacity-value">${state.fillOpacity.toFixed(2)}</span></label>
+      <input type="range" id="fill-opacity-slider" min="0" max="1" step="0.05" value="${state.fillOpacity}">
+    </div>
+    <div class="control-group">
+      <label for="stroke-opacity-slider">Opacità contorno: <span id="stroke-opacity-value">${state.strokeOpacity.toFixed(2)}</span></label>
+      <input type="range" id="stroke-opacity-slider" min="0" max="1" step="0.05" value="${state.strokeOpacity}">
+    </div>
+    <div class="control-group">
       <label for="noise-slider">Intensità noise: <span id="noise-value">${state.noiseIntensity.toFixed(2)}</span></label>
       <input type="range" id="noise-slider" min="0" max="2" step="0.05" value="${state.noiseIntensity}">
     </div>
@@ -274,6 +288,16 @@ function setupControls() {
     state.strokeWidth = Number(e.target.value)
     document.getElementById('stroke-width-value').textContent = state.strokeWidth + 'px'
     textNeedsRedraw = true
+  })
+
+  document.getElementById('fill-opacity-slider').addEventListener('input', e => {
+    state.fillOpacity = Number(e.target.value)
+    document.getElementById('fill-opacity-value').textContent = state.fillOpacity.toFixed(2)
+  })
+
+  document.getElementById('stroke-opacity-slider').addEventListener('input', e => {
+    state.strokeOpacity = Number(e.target.value)
+    document.getElementById('stroke-opacity-value').textContent = state.strokeOpacity.toFixed(2)
   })
 
   document.getElementById('noise-slider').addEventListener('input', e => {
