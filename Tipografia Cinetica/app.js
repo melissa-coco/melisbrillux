@@ -252,13 +252,24 @@ function exportVideo() {
 // === Font Loading ===
 function loadFont(family) {
   return new Promise((resolve) => {
+    const isSystemFont = family === 'Times New Roman'
+    if (isSystemFont) {
+      resolve()
+      return
+    }
     const link = document.createElement('link')
     link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:wght@400;700&display=swap`
     link.rel = 'stylesheet'
-    link.onload = resolve
-    link.onerror = resolve
     document.head.appendChild(link)
-    setTimeout(resolve, 3000)
+    const checkFont = () => {
+      if (document.fonts.check(`1em "${family}"`)) {
+        resolve()
+      } else {
+        setTimeout(checkFont, 100)
+      }
+    }
+    checkFont()
+    setTimeout(resolve, 5000)
   })
 }
 
