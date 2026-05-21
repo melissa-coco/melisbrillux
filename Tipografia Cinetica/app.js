@@ -264,7 +264,7 @@ function buildControls() {
       <select id="font-select">
         <option value="Lato" ${state.font === 'Lato' ? 'selected' : ''}>Lato</option>
         <option value="Times New Roman" ${state.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
-        <option value="Oi" ${state.font === 'Oi' ? 'selected' : ''}>Oi</option>
+
       </select>
     </div>
     <div class="control-group">
