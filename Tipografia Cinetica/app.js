@@ -11,6 +11,9 @@ const state = {
   strokeOpacity: 1.0,
   noiseIntensity: 0.45,
   speed: 3.7,
+  bgEnabled: true,
+  bgColor: '#0f0f23',
+  paused: false,
 }
 
 // === Canvas & WebGL Setup ===
@@ -171,7 +174,9 @@ function ensureTexture() {
 // === Animation Loop ===
 function loop() {
   const dt = 1 / 60
-  animTime += dt * state.speed
+  if (!state.paused) {
+    animTime += dt * state.speed
+  }
 
   gl.useProgram(program)
   gl.bindVertexArray(vao)
@@ -196,6 +201,103 @@ function loop() {
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
   rafId = requestAnimationFrame(loop)
+}
+
+// === Background ===
+function updateBackground() {
+  const container = document.getElementById('canvas-container')
+  if (state.bgEnabled) {
+    container.style.background = state.bgColor
+  } else {
+    container.style.background = 'transparent'
+  }
+}
+
+// === Export ===
+let mediaRecorder = null
+let recordingChunks = []
+
+function exportVideo() {
+  const stream = canvas.captureStream(30)
+  recordingChunks = []
+  const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+  let mimeType = mimeTypes.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm'
+  mediaRecorder = new MediaRecorder(stream, { mimeType })
+  mediaRecorder.ondataavailable = e => {
+    if (e.data.size > 0) recordingChunks.push(e.data)
+  }
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordingChunks, { type: 'video/webm' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${state.word}.webm`
+    a.click()
+    URL.revokeObjectURL(url)
+    recordingChunks = []
+  }
+  mediaRecorder.start()
+  const btn = document.getElementById('export-video-btn')
+  btn.textContent = '⏺ Registrando...'
+  btn.disabled = true
+  setTimeout(() => {
+    mediaRecorder.stop()
+    btn.textContent = '▶ Esporta MP4'
+    btn.disabled = false
+  }, 3000)
+}
+
+function loadGifJs() {
+  return new Promise((resolve, reject) => {
+    if (window.GIF) { resolve(window.GIF); return }
+    const script = document.createElement('script')
+    script.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js'
+    script.onload = () => resolve(window.GIF)
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+}
+
+async function exportGif() {
+  const btn = document.getElementById('export-gif-btn')
+  btn.textContent = '⏺ GIF...'
+  btn.disabled = true
+  try {
+    const GIF = await loadGifJs()
+    const totalFrames = 60
+    const fps = 20
+    const gif = new GIF({
+      workers: 2,
+      quality: 10,
+      width: canvas.width,
+      height: canvas.height,
+    })
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = canvas.width
+    tempCanvas.height = canvas.height
+    const tempCtx = tempCanvas.getContext('2d')
+    for (let i = 0; i < totalFrames; i++) {
+      tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height)
+      tempCtx.drawImage(canvas, 0, 0)
+      gif.addFrame(tempCtx, { copy: true, delay: 1000 / fps })
+      await new Promise(r => setTimeout(r, 1000 / fps))
+    }
+    gif.on('finished', blob => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${state.word}.gif`
+      a.click()
+      URL.revokeObjectURL(url)
+      btn.textContent = '▶ GIF'
+      btn.disabled = false
+    })
+    gif.render()
+  } catch (e) {
+    btn.textContent = '▶ GIF'
+    btn.disabled = false
+    alert('Errore caricamento GIF library')
+  }
 }
 
 // === Font Loading ===
@@ -258,7 +360,25 @@ function buildControls() {
       <label for="speed-slider">Velocità: <span id="speed-value">${state.speed.toFixed(1)}</span></label>
       <input type="range" id="speed-slider" min="0.1" max="5" step="0.1" value="${state.speed}">
     </div>
-
+    <hr>
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="bg-toggle" ${state.bgEnabled ? 'checked' : ''}>
+        Sfondo
+      </label>
+    </div>
+    <div class="control-group" id="bg-color-group" style="${state.bgEnabled ? '' : 'display:none'}">
+      <label for="bg-color-input">Colore sfondo</label>
+      <input type="color" id="bg-color-input" value="${state.bgColor}">
+    </div>
+    <hr>
+    <div class="controls-actions">
+      <button class="btn btn-primary" id="pause-btn">⏸ Pausa</button>
+    </div>
+    <div class="controls-actions">
+      <button class="btn btn-primary" id="export-video-btn">▶ Esporta MP4</button>
+      <button class="btn btn-secondary" id="export-gif-btn">▶ GIF</button>
+    </div>
   `
 }
 buildControls()
@@ -310,7 +430,24 @@ function setupControls() {
     document.getElementById('speed-value').textContent = state.speed.toFixed(1)
   })
 
+  document.getElementById('pause-btn').addEventListener('click', () => {
+    state.paused = !state.paused
+    document.getElementById('pause-btn').textContent = state.paused ? '▶ Play' : '⏸ Pausa'
+  })
 
+  document.getElementById('bg-toggle').addEventListener('change', e => {
+    state.bgEnabled = e.target.checked
+    document.getElementById('bg-color-group').style.display = state.bgEnabled ? '' : 'none'
+    updateBackground()
+  })
+
+  document.getElementById('bg-color-input').addEventListener('input', e => {
+    state.bgColor = e.target.value
+    updateBackground()
+  })
+
+  document.getElementById('export-video-btn').addEventListener('click', exportVideo)
+  document.getElementById('export-gif-btn').addEventListener('click', exportGif)
 }
 setupControls()
 
@@ -318,6 +455,7 @@ setupControls()
 loadFont(state.font).then(() => {
   textNeedsRedraw = true
 })
+updateBackground()
 initShaders()
 initGeometry()
 resizeCanvas()

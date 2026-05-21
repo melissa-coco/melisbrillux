@@ -78,6 +78,11 @@ main {
   font-size: 0.95rem;
 }
 
+.control-group input[type="checkbox"] {
+  accent-color: #e94560;
+  margin-right: 6px;
+}
+
 .control-group input[type="range"] {
   width: 100%;
   accent-color: #e94560;
@@ -132,6 +137,12 @@ main {
 
 .controls-actions .btn {
   flex: 1;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #0f3460;
+  margin: 4px 0;
 }
 
 #loop-btn.active {
