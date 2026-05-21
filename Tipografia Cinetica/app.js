@@ -2,13 +2,13 @@ import { vertexShaderSource, fragmentShaderSource } from './shaders.js'
 
 // === State ===
 const state = {
-  word: 'CAOS',
-  font: 'Fredoka One',
+  word: 'SHAKE',
+  font: 'Lato',
   color: '#FF6B6B',
+  strokeWidth: 2,
+  strokeColor: '#FFFFFF',
   noiseIntensity: 0.8,
   speed: 1.5,
-  glitchFrequency: 3.0,
-  glitchAmount: 30,
 }
 
 // === Canvas & WebGL Setup ===
@@ -26,9 +26,6 @@ const offCtx = offscreen.getContext('2d')
 let program, uLocations, vao, texture
 let textNeedsRedraw = true
 let animTime = 0
-let glitchTimer = 0
-let glitchActive = 0
-let glitchSeed = 0
 let rafId = null
 
 function compileShader(type, source) {
@@ -62,9 +59,6 @@ function initShaders() {
     uResolution: gl.getUniformLocation(program, 'uResolution'),
     uNoiseIntensity: gl.getUniformLocation(program, 'uNoiseIntensity'),
     uSpeed: gl.getUniformLocation(program, 'uSpeed'),
-    uGlitchAmount: gl.getUniformLocation(program, 'uGlitchAmount'),
-    uGlitchActive: gl.getUniformLocation(program, 'uGlitchActive'),
-    uGlitchSeed: gl.getUniformLocation(program, 'uGlitchSeed'),
     uColor: gl.getUniformLocation(program, 'uColor'),
   }
 }
@@ -138,6 +132,10 @@ function renderTextToCanvas() {
 
   offCtx.textAlign = 'center'
   offCtx.textBaseline = 'middle'
+  offCtx.strokeStyle = state.strokeColor
+  offCtx.lineWidth = state.strokeWidth
+  offCtx.lineJoin = 'round'
+  offCtx.strokeText(state.word, w / 2, h / 2)
   offCtx.fillStyle = '#ffffff'
   offCtx.fillText(state.word, w / 2, h / 2)
 }
@@ -146,6 +144,7 @@ function uploadTexture() {
   if (texture) gl.deleteTexture(texture)
   texture = gl.createTexture()
   gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, offscreen)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
@@ -167,19 +166,6 @@ function loop() {
   const dt = 1 / 60
   animTime += dt * state.speed
 
-  glitchTimer += dt
-  if (glitchActive > 0) {
-    glitchActive -= dt
-    if (glitchActive <= 0) {
-      glitchActive = 0
-      glitchTimer = 0
-    }
-  } else if (glitchTimer >= state.glitchFrequency) {
-    glitchActive = 0.1 + Math.random() * 0.15
-    glitchSeed = Math.random() * 100
-    glitchTimer = 0
-  }
-
   gl.useProgram(program)
   gl.bindVertexArray(vao)
   ensureTexture()
@@ -192,9 +178,6 @@ function loop() {
   gl.uniform2f(uLocations.uResolution, canvas.width, canvas.height)
   gl.uniform1f(uLocations.uNoiseIntensity, state.noiseIntensity)
   gl.uniform1f(uLocations.uSpeed, state.speed)
-  gl.uniform1f(uLocations.uGlitchAmount, state.glitchAmount)
-  gl.uniform1f(uLocations.uGlitchActive, Math.min(glitchActive * 4, 1))
-  gl.uniform1f(uLocations.uGlitchSeed, glitchSeed)
 
   const [r, g, b] = hexToRgb(state.color)
   gl.uniform3f(uLocations.uColor, r, g, b)
@@ -229,16 +212,24 @@ function buildControls() {
     <div class="control-group">
       <label for="font-select">Font</label>
       <select id="font-select">
-        <option value="Fredoka One" ${state.font === 'Fredoka One' ? 'selected' : ''}>Fredoka One</option>
-        <option value="Chewy" ${state.font === 'Chewy' ? 'selected' : ''}>Chewy</option>
-        <option value="Bubblegum Sans" ${state.font === 'Bubblegum Sans' ? 'selected' : ''}>Bubblegum Sans</option>
-        <option value="Baloo 2" ${state.font === 'Baloo 2' ? 'selected' : ''}>Baloo 2</option>
-        <option value="Lilita One" ${state.font === 'Lilita One' ? 'selected' : ''}>Lilita One</option>
+        <option value="Lato" ${state.font === 'Lato' ? 'selected' : ''}>Lato</option>
+        <option value="Roboto" ${state.font === 'Roboto' ? 'selected' : ''}>Roboto</option>
+        <option value="Times New Roman" ${state.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+        <option value="Montserrat" ${state.font === 'Montserrat' ? 'selected' : ''}>Montserrat</option>
+        <option value="Lobster" ${state.font === 'Lobster' ? 'selected' : ''}>Lobster</option>
       </select>
     </div>
     <div class="control-group">
       <label for="color-input">Colore</label>
       <input type="color" id="color-input" value="${state.color}">
+    </div>
+    <div class="control-group">
+      <label for="stroke-color-input">Colore contorno</label>
+      <input type="color" id="stroke-color-input" value="${state.strokeColor}">
+    </div>
+    <div class="control-group">
+      <label for="stroke-width-slider">Spessore contorno: <span id="stroke-width-value">${state.strokeWidth}px</span></label>
+      <input type="range" id="stroke-width-slider" min="0" max="10" step="1" value="${state.strokeWidth}">
     </div>
     <div class="control-group">
       <label for="noise-slider">Intensità noise: <span id="noise-value">${state.noiseIntensity.toFixed(2)}</span></label>
@@ -248,14 +239,7 @@ function buildControls() {
       <label for="speed-slider">Velocità: <span id="speed-value">${state.speed.toFixed(1)}</span></label>
       <input type="range" id="speed-slider" min="0.1" max="5" step="0.1" value="${state.speed}">
     </div>
-    <div class="control-group">
-      <label for="glitch-freq-slider">Freq. glitch: <span id="glitch-freq-value">${state.glitchFrequency.toFixed(1)}s</span></label>
-      <input type="range" id="glitch-freq-slider" min="0.5" max="10" step="0.5" value="${state.glitchFrequency}">
-    </div>
-    <div class="control-group">
-      <label for="glitch-amount-slider">Intensità glitch: <span id="glitch-amount-value">${state.glitchAmount}px</span></label>
-      <input type="range" id="glitch-amount-slider" min="0" max="50" step="1" value="${state.glitchAmount}">
-    </div>
+
   `
 }
 buildControls()
@@ -276,6 +260,17 @@ function setupControls() {
     state.color = e.target.value
   })
 
+  document.getElementById('stroke-color-input').addEventListener('input', e => {
+    state.strokeColor = e.target.value
+    textNeedsRedraw = true
+  })
+
+  document.getElementById('stroke-width-slider').addEventListener('input', e => {
+    state.strokeWidth = Number(e.target.value)
+    document.getElementById('stroke-width-value').textContent = state.strokeWidth + 'px'
+    textNeedsRedraw = true
+  })
+
   document.getElementById('noise-slider').addEventListener('input', e => {
     state.noiseIntensity = Number(e.target.value)
     document.getElementById('noise-value').textContent = state.noiseIntensity.toFixed(2)
@@ -286,15 +281,7 @@ function setupControls() {
     document.getElementById('speed-value').textContent = state.speed.toFixed(1)
   })
 
-  document.getElementById('glitch-freq-slider').addEventListener('input', e => {
-    state.glitchFrequency = Number(e.target.value)
-    document.getElementById('glitch-freq-value').textContent = state.glitchFrequency.toFixed(1) + 's'
-  })
 
-  document.getElementById('glitch-amount-slider').addEventListener('input', e => {
-    state.glitchAmount = Number(e.target.value)
-    document.getElementById('glitch-amount-value').textContent = state.glitchAmount + 'px'
-  })
 }
 setupControls()
 

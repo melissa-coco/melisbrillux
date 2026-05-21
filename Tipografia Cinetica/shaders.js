@@ -22,9 +22,6 @@ uniform float uTime;
 uniform vec2 uResolution;
 uniform float uNoiseIntensity;
 uniform float uSpeed;
-uniform float uGlitchAmount;
-uniform float uGlitchActive;
-uniform float uGlitchSeed;
 uniform vec3 uColor;
 
 // Simplex noise 3D — Stefan Gustavson / Ashima Arts
@@ -101,24 +98,8 @@ void main() {
     return;
   }
 
-  // RGB Split Glitch
-  float glitch = uGlitchActive;
-  float seedOffset = uGlitchSeed * 0.1;
-  float glitchX = snoise(vec3(finalUv.x * 10.0 + seedOffset, finalUv.y * 10.0, t * 2.0));
-
-  vec2 glitchDir = vec2(
-    glitchX * uGlitchAmount / uResolution.x,
-    glitchX * uGlitchAmount / uResolution.y * 0.3
-  );
-
-  float r = texture(uTexture, finalUv + glitchDir * glitch).r;
-  float g = texColor.g;
-  float b = texture(uTexture, finalUv - glitchDir * glitch).b;
-
   float lum = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
-  vec3 colored = uColor * lum;
-
-  vec3 finalColor = mix(colored, vec3(r, g, b), glitch * 0.8);
+  vec3 finalColor = uColor * lum;
 
   fragColor = vec4(finalColor, texColor.a);
 }
