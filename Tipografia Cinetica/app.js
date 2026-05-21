@@ -299,7 +299,9 @@ function setupControls() {
 setupControls()
 
 // === Init ===
-loadFont(state.font)
+loadFont(state.font).then(() => {
+  textNeedsRedraw = true
+})
 initShaders()
 initGeometry()
 resizeCanvas()
