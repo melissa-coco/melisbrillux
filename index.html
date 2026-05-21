@@ -3,16 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vector Pattern Tool</title>
-  <link rel="stylesheet" href="src/style.css">
+  <title>Melissa — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Extended+Text&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <div id="canvas-container">
-      <svg id="canvas" xmlns="http://www.w3.org/2000/svg"></svg>
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" data-section="hero">MELISSA COCO</a>
+      <div class="nav-links">
+        <a href="#" data-section="works" data-it="Lavori" data-en="Works">WORKS</a>
+        <a href="#" data-section="about" data-it="ABOUT" data-en="ABOUT">ABOUT</a>
+        <a href="#" data-section="contact" data-it="Contatti" data-en="Contact">CONTACT</a>
+      </div>
+      <button id="lang-toggle" data-it="EN" data-en="IT">EN</button>
     </div>
-    <aside id="panel"></aside>
+  </nav>
+
+  <div id="lava-bg">
+    <div id="lava-contrast">
+      <div class="c">
+        <div class="b"></div>
+      </div>
+    </div>
   </div>
-  <script type="module" src="src/main.js"></script>
+
+  <section id="hero" class="section active">
+    <div class="hero-overlay">
+      <h1 data-it="Melissa" data-en="Melissa">MELISSA COCO</h1>
+      <p class="hero-sub" data-it="WS INTERACTION DESIGN &amp; AI" data-en="WS INTERACTION DESIGN &amp; AI">WS INTERACTION DESIGN &amp; AI</p>
+      <p class="hero-date" data-it="18 - 22 MAGGIO 2025" data-en="18 - 22 MAGGIO 2025">18 - 22 MAGGIO 2025</p>
+      <a href="#" class="hero-cta" data-section="works" data-it="Vedi i lavori" data-en="View my work">ESPLORA</a>
+    </div>
+  </section>
+
+  <section id="works" class="section">
+    <h2 data-it="Lavori" data-en="Works">LAVORI</h2>
+    <div class="works-grid" id="works-grid"></div>
+  </section>
+
+  <section id="about" class="section">
+    <h2 data-it="ABOUT" data-en="ABOUT">ABOUT</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>ABOUT MELISSA</h3>
+        <p class="about-text" data-it="Sono una designer e creative coder con una fame insaziabile di sperimentazione. Il mio lavoro si muove tra interaction design, motion graphics e generative art — con l'obbiettivo di creare esperienze visive che parlano, emozionano e, perché no, stupiscono. Ogni progetto è un'occasione per mescolare codici, colori e idee, trasformando concetti in linguaggi visivi vivi." data-en="I'm a designer and creative coder with an insatiable hunger for experimentation. My work lives at the intersection of interaction design, motion graphics, and generative art — creating visual experiences that speak, move, and surprise. Every project is a chance to blend code, color, and ideas into living visual languages.">Sono una designer e creative coder con una fame insaziabile di sperimentazione. Il mio lavoro si muove tra interaction design, motion graphics e generative art — con l'obbiettivo di creare esperienze visive che parlano, emozionano e, perché no, stupiscono. Ogni progetto è un'occasione per mescolare codici, colori e idee, trasformando concetti in linguaggi visivi vivi.</p>
+      </div>
+      <div class="about-card">
+        <h3>ABOUT ABADIR</h3>
+        <p class="about-text" data-it="ABADIR è un'accademia che non si accontenta del già visto. Qui il design si insegna come pratica viva, tra laboratorio e pensiero critico. È il luogo dove ho imparato a guardare oltre lo schermo — a interrogare la forma, la materia, il movimento. Un posto che spinge a rompere le regole, ma prima a conoscerle bene." data-en="ABADIR is an academy that refuses the ordinary. Here design is taught as a living practice — between hands-on workshops and critical thinking. It's where I learned to look beyond the screen, questioning form, material, and movement. A place that pushes you to break the rules — but first, to know them inside out.">ABADIR è un'accademia che non si accontenta del già visto. Qui il design si insegna come pratica viva, tra laboratorio e pensiero critico. È il luogo dove ho imparato a guardare oltre lo schermo — a interrogare la forma, la materia, il movimento. Un posto che spinge a rompere le regole, ma prima a conoscerle bene.</p>
+      </div>
+      <div class="about-card">
+        <h3>ABOUT WS</h3>
+        <p class="about-text" data-it="Il workshop 'Interaction Design & AI' è stato un'esplosione di creatività collettiva. Per cinque giorni abbiamo progettato, prototipato e fallito — per poi riprovare, meglio. Tra algortimi generativi, motion design e interazioni in tempo reale, ogni partecipante ha costruito qualcosa di unico. Questo portfolio è il diario di bordo di quel viaggio." data-en="The 'Interaction Design & AI' workshop was an explosion of collective creativity. For five days we designed, prototyped, failed — then tried again, better. Between generative algorithms, motion design, and real-time interactions, each participant built something unique. This portfolio is the logbook of that journey.">Il workshop 'Interaction Design & AI' è stato un'esplosione di creatività collettiva. Per cinque giorni abbiamo progettato, prototipato e fallito — per poi riprovare, meglio. Tra algortimi generativi, motion design e interazioni in tempo reale, ogni partecipante ha costruito qualcosa di unico. Questo portfolio è il diario di bordo di quel viaggio.</p>
+      </div>
+    </div>
+    <div class="about-links">
+      <a href="https://github.com/" target="_blank">GitHub</a>
+      <a href="https://instagram.com/" target="_blank">Instagram</a>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <h2 data-it="Contatti" data-en="Contact">Contatti</h2>
+    <div class="contact-content">
+      <a href="mailto:melissa@email.com" class="contact-email" data-it="melissa@email.com" data-en="melissa@email.com">m.coco@abadir.net</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Melissa Coco — WS Interaction Design &amp; AI</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="hero.js"></script>
+  <script src="app.js"></script>
+  <script src="previews.js"></script>
 </body>
 </html>

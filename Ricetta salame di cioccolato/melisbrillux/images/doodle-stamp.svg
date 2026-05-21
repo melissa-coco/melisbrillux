@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="10" y="10" width="80" height="80" rx="5" fill="none" stroke="#CE2B37" stroke-width="3" stroke-dasharray="4 4"/>
+  <text x="50" y="55" font-family="serif" font-size="14" text-anchor="middle" fill="#CE2B37" transform="rotate(-8 50 55)">APPROVATO</text>
+  <circle cx="25" cy="22" r="4" fill="#CE2B37"/>
+  <circle cx="75" cy="22" r="4" fill="#CE2B37"/>
+  <circle cx="25" cy="78" r="4" fill="#CE2B37"/>
+  <circle cx="75" cy="78" r="4" fill="#CE2B37"/>
+</svg>

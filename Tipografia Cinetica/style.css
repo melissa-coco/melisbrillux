@@ -1,0 +1,147 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  padding: 12px 24px;
+  background: #16213e;
+  border-bottom: 1px solid #0f3460;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+#canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #0f0f23;
+}
+
+#controls {
+  width: 320px;
+  padding: 20px;
+  background: #16213e;
+  border-left: 1px solid #0f3460;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-group label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8899aa;
+}
+
+.control-group input[type="text"],
+.control-group select {
+  padding: 8px 12px;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  background: #1a1a2e;
+  color: #eee;
+  font-size: 0.95rem;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  accent-color: #e94560;
+}
+
+.color-picker-group {
+  display: flex;
+  gap: 8px;
+}
+
+.color-picker-group input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #0f3460;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary {
+  background: #e94560;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #d63851;
+}
+
+.btn-secondary {
+  background: #0f3460;
+  color: #eee;
+}
+
+.btn-secondary:hover {
+  background: #1a4a80;
+}
+
+.controls-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.controls-actions .btn {
+  flex: 1;
+}
+
+#loop-btn.active {
+  background: #e94560;
+  color: #fff;
+}
+
+#main-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff8f0 0%, #fff 50%, #f0f8ff 100%);
+}

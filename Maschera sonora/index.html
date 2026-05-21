@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Girandola Sonora</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      background: #caf0f8;
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #pinwheel-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    #girandola {
+      width: 80vmin;
+      height: auto;
+    }
+
+    #blades-wrapper {
+      transform-origin: 298.95px 307.43px;
+      transition: transform 0.4s ease;
+    }
+
+    #blades-wrapper.growing {
+      transform: scale(1.5);
+    }
+
+    #spin-layer {
+      transform-origin: 298.95px 307.43px;
+    }
+
+    #spin-layer.spinning {
+      animation: spin var(--speed, 2s) linear infinite;
+    }
+
+    @keyframes spin {
+      from { rotate: 0deg; }
+      to { rotate: 360deg; }
+    }
+
+    #controls {
+      background: #2a2a2a;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .control-group label {
+      white-space: nowrap;
+      min-width: 40px;
+    }
+
+    #mic-btn {
+      background: #444;
+      border: 2px solid #666;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    #mic-btn:hover { background: #555; }
+    #mic-btn.active { border-color: #4caf50; background: #2e7d32; }
+
+    #sound-level {
+      flex: 1;
+      min-width: 120px;
+      height: 8px;
+      background: #444;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #sound-level-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+      transition: width 0.05s linear;
+    }
+
+    #sound-level-threshold {
+      position: absolute;
+      top: -2px;
+      bottom: -2px;
+      width: 2px;
+      background: #fff;
+      border-radius: 1px;
+    }
+
+    #sound-level-max {
+      position: absolute;
+      top: -2px;
+      bottom: -2px;
+      width: 2px;
+      background: #ffeb3b;
+      border-radius: 1px;
+      opacity: 0.7;
+    }
+
+    input[type="range"] {
+      width: 100px;
+      accent-color: #f39200;
+      cursor: pointer;
+    }
+
+    #level-display, #sensitivity-display, #gain-display, #max-offset-display, #speed-min-display, #speed-max-display {
+      min-width: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="pinwheel-container">
+      <svg id="girandola" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595.28 841.89">
+        <defs>
+          <style>
+            .cls-1 { fill: #7d4e24; }
+            .cls-1, .cls-2, .cls-3, .cls-4 { stroke: #1d1d1b; stroke-miterlimit: 10; stroke-width: .5px; }
+            .cls-2 { fill: #f39200; }
+            .cls-3 { fill: #009fe3; }
+            .cls-4 { fill: #d60b52; }
+          </style>
+        </defs>
+        <g id="stecca">
+          <rect class="cls-1" x="283.2" y="403.6" width="33.68" height="208.82"/>
+        </g>
+        <g id="blades-wrapper">
+          <g id="spin-layer">
+            <g id="centro">
+              <circle class="cls-3" id="centro-circle" cx="298.95" cy="307.43" r="30.24"/>
+            </g>
+            <g id="ali_arancioni">
+              <path class="cls-2" id="ala-arancione-1" d="M161.01,163.65h115.91l80.39,80.39-29.91,29.91c-3.03-2.49-12.86-9.94-27.48-10.42-16.48-.54-27.69,8.13-30.48,10.42-36.14-36.77-72.29-73.53-108.43-110.3Z"/>
+              <path class="cls-2" id="ala-arancione-2" d="M437.16,452.17h-115.91l-80.39-80.39,29.91-29.91c3.03,2.49,12.86,9.94,27.48,10.42,16.48.54,27.69-8.13,30.48-10.42,36.14,36.77,72.29,73.53,108.43,110.3Z"/>
+            </g>
+            <g id="ali_ciliegia">
+              <path class="cls-4" id="ala-ciliegia-1" d="M440.23,167.05v117.71s-79.16,81.64-79.16,81.64l-29.45-30.38c2.46-3.08,9.78-13.06,10.26-27.9.53-16.73-8-28.12-10.26-30.95,36.2-36.71,72.41-73.41,108.61-110.12Z"/>
+              <path class="cls-4" id="ala-ciliegia-2" d="M156.42,446.32v-115.91l80.39-80.39,29.91,29.91c-2.49,3.03-9.94,12.86-10.42,27.48-.54,16.48,8.13,27.69,10.42,30.48-36.77,36.14-73.53,72.29-110.3,108.43Z"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div id="controls">
+      <div class="control-group">
+        <button id="mic-btn">Microfono</button>
+      </div>
+      <div class="control-group">
+        <label>📊</label>
+        <div id="sound-level">
+          <div id="sound-level-fill"></div>
+          <div id="sound-level-threshold"></div>
+          <div id="sound-level-max"></div>
+        </div>
+        <span id="level-display">0</span>
+      </div>
+      <div class="control-group">
+        <label for="sensitivity">🔈 Soglia</label>
+        <input type="range" id="sensitivity" min="1" max="80" value="30">
+        <span id="sensitivity-display">30</span>
+      </div>
+      <div class="control-group">
+        <label for="gain">📢 Guadagno</label>
+        <input type="range" id="gain" min="25" max="200" value="150" step="5">
+        <span id="gain-display">150%</span>
+      </div>
+      <div class="control-group">
+        <label for="max-offset">🎯 Massimo</label>
+        <input type="range" id="max-offset" min="0" max="150" value="60" step="5">
+        <span id="max-offset-display">60</span>
+      </div>
+      <div class="control-group">
+        <label for="speed-min">🔉 Volume basso</label>
+        <input type="range" id="speed-min" min="500" max="5000" value="3000" step="100">
+        <span id="speed-min-display">3.0s</span>
+      </div>
+      <div class="control-group">
+        <label for="speed-max">🔊 Volume alto</label>
+        <input type="range" id="speed-max" min="100" max="3000" value="500" step="100">
+        <span id="speed-max-display">0.5s</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    let audioCtx = null;
+    let analyser = null;
+    let dataArray = null;
+    let source = null;
+    let stream = null;
+    let isListening = false;
+    let isSoundActive = false;
+
+    const SENSITIVITY_DEFAULT = 30;
+    const GAIN_DEFAULT = 150;
+    const MAX_OFFSET_DEFAULT = 60;
+    const SILENCE_FRAMES = 8;
+    const LERP_SPEED = 0.1;
+    let silenceCounter = 0;
+    let sensitivity = SENSITIVITY_DEFAULT;
+    let gain = GAIN_DEFAULT;
+    let maxOffset = MAX_OFFSET_DEFAULT;
+    let speedMinMs = 3000;
+    let speedMaxMs = 500;
+    let smoothDuration = 2000;
+
+    const COLORS = {
+      centro: { start: '#009fe3', target: '#e6332a' },
+      ali_arancioni: { start: '#f39200', target: '#662483' },
+      ali_ciliegia: { start: '#d60b52', target: '#009640' },
+    };
+
+    const svgElement = document.getElementById('girandola');
+    const wrapper = document.getElementById('blades-wrapper');
+    const spinLayer = document.getElementById('spin-layer');
+
+    const elements = {
+      centro: document.getElementById('centro-circle'),
+      ali_arancioni: [
+        document.getElementById('ala-arancione-1'),
+        document.getElementById('ala-arancione-2'),
+      ],
+      ali_ciliegia: [
+        document.getElementById('ala-ciliegia-1'),
+        document.getElementById('ala-ciliegia-2'),
+      ],
+    };
+
+    function parseColor(str) {
+      if (str.startsWith('#')) {
+        const hex = str.slice(1);
+        return {
+          r: parseInt(hex.slice(0, 2), 16),
+          g: parseInt(hex.slice(2, 4), 16),
+          b: parseInt(hex.slice(4, 6), 16),
+        };
+      }
+      const m = str.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (m) {
+        return { r: +m[1], g: +m[2], b: +m[3] };
+      }
+      return { r: 0, g: 0, b: 0 };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, '0')).join('');
+    }
+
+    function lerpColor(c1, c2, t) {
+      return rgbToHex(
+        c1.r + (c2.r - c1.r) * t,
+        c1.g + (c2.g - c1.g) * t,
+        c1.b + (c2.b - c1.b) * t
+      );
+    }
+
+    let colorAnimId = null;
+
+    function lerpToTarget(targetColors, duration = 400) {
+      if (colorAnimId) cancelAnimationFrame(colorAnimId);
+
+      const startColors = {};
+      for (const [key, ids] of Object.entries(elements)) {
+        const el = Array.isArray(ids) ? ids[0] : ids;
+        const computedStyle = getComputedStyle(el);
+        startColors[key] = parseColor(computedStyle.fill || COLORS[key].start);
+      }
+
+      const targetRgb = {};
+      for (const [key, val] of Object.entries(targetColors)) {
+        targetRgb[key] = parseColor(val);
+      }
+
+      const startTime = performance.now();
+
+      function animateColor(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+
+        for (const [key, ids] of Object.entries(elements)) {
+          const color = lerpColor(startColors[key], targetRgb[key], ease);
+          if (Array.isArray(ids)) {
+            ids.forEach(el => el.style.fill = color);
+          } else {
+            ids.style.fill = color;
+          }
+        }
+
+        if (t < 1) {
+          colorAnimId = requestAnimationFrame(animateColor);
+        }
+      }
+
+      colorAnimId = requestAnimationFrame(animateColor);
+    }
+
+    function setSound() {
+      wrapper.classList.add('growing');
+      spinLayer.classList.add('spinning');
+      lerpToTarget({
+        centro: COLORS.centro.target,
+        ali_arancioni: COLORS.ali_arancioni.target,
+        ali_ciliegia: COLORS.ali_ciliegia.target,
+      });
+    }
+
+    function setNoSound() {
+      wrapper.classList.remove('growing');
+      spinLayer.classList.remove('spinning');
+      lerpToTarget({
+        centro: COLORS.centro.start,
+        ali_arancioni: COLORS.ali_arancioni.start,
+        ali_ciliegia: COLORS.ali_ciliegia.start,
+      });
+    }
+
+    async function startAudio() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        isListening = true;
+        document.getElementById('mic-btn').classList.add('active');
+        document.getElementById('mic-btn').textContent = '🟢 In ascolto';
+        analyzeLoop();
+      } catch (err) {
+        console.error('Microfono non disponibile:', err);
+        alert('Impossibile accedere al microfono. Verifica i permessi.');
+      }
+    }
+
+    function stopAudio() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+      }
+      if (audioCtx) {
+        audioCtx.close();
+      }
+      audioCtx = null;
+      analyser = null;
+      source = null;
+      stream = null;
+      isListening = false;
+      document.getElementById('mic-btn').classList.remove('active');
+      document.getElementById('mic-btn').textContent = '🎤 Avvia microfono';
+      setNoSound();
+    }
+
+    function mapAmplitudeToSpeed(level, threshold255, maxOffset255) {
+      const effectiveMax = 255 - maxOffset255;
+      const range = effectiveMax - threshold255;
+      if (range <= 0) return speedMaxMs;
+      const excess = Math.max(0, level - threshold255);
+      const t = Math.min(excess / range, 1);
+      return speedMinMs + t * (speedMaxMs - speedMinMs);
+    }
+
+    function analyzeLoop() {
+      if (!isListening) return;
+
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const level = sum / dataArray.length;
+
+      const gainLevel = Math.min(255, level * (gain / 100));
+
+      const fill = document.getElementById('sound-level-fill');
+      fill.style.width = Math.min(100, (gainLevel / 255) * 100) + '%';
+
+      document.getElementById('level-display').textContent = Math.round((gainLevel / 255) * 100);
+
+      if (gainLevel > (sensitivity / 100) * 255) {
+        silenceCounter = 0;
+        if (!isSoundActive) {
+          isSoundActive = true;
+          setSound();
+        }
+        if (isSoundActive) {
+          const target = mapAmplitudeToSpeed(gainLevel, (sensitivity / 100) * 255, (maxOffset / 100) * 255);
+          smoothDuration += (target - smoothDuration) * LERP_SPEED;
+          spinLayer.style.animationDuration = Math.round(smoothDuration) + 'ms';
+        }
+      } else {
+        silenceCounter++;
+        if (silenceCounter >= SILENCE_FRAMES && isSoundActive) {
+          isSoundActive = false;
+          setNoSound();
+        }
+      }
+
+      requestAnimationFrame(analyzeLoop);
+    }
+
+    document.getElementById('mic-btn').addEventListener('click', () => {
+      if (isListening) {
+        stopAudio();
+      } else {
+        startAudio();
+      }
+    });
+
+    document.getElementById('sensitivity').addEventListener('input', (e) => {
+      sensitivity = parseInt(e.target.value);
+      document.getElementById('sensitivity-display').textContent = sensitivity;
+      document.getElementById('sound-level-threshold').style.left = sensitivity + '%';
+    });
+
+    document.getElementById('speed-min').addEventListener('input', (e) => {
+      speedMinMs = parseInt(e.target.value);
+      document.getElementById('speed-min-display').textContent = (speedMinMs / 1000).toFixed(1) + 's';
+    });
+
+    document.getElementById('speed-max').addEventListener('input', (e) => {
+      speedMaxMs = parseInt(e.target.value);
+      document.getElementById('speed-max-display').textContent = (speedMaxMs / 1000).toFixed(1) + 's';
+    });
+
+    document.getElementById('gain').addEventListener('input', (e) => {
+      gain = parseInt(e.target.value);
+      document.getElementById('gain-display').textContent = gain + '%';
+    });
+
+    function updateMaxLine() {
+      const pos = ((255 - maxOffset) / 255) * 100;
+      document.getElementById('sound-level-max').style.left = pos + '%';
+    }
+
+    document.getElementById('max-offset').addEventListener('input', (e) => {
+      maxOffset = parseInt(e.target.value);
+      document.getElementById('max-offset-display').textContent = maxOffset;
+      updateMaxLine();
+    });
+
+    document.getElementById('sound-level-threshold').style.left = '30%';
+    updateMaxLine();
+  </script>
+</body>
+</html>

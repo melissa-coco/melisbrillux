@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble Pop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; overflow: hidden; font-family: system-ui, sans-serif; }
+    #app-canvas { display: block; width: 100vw; height: 100vh; }
+    #debug-video { display: none; }
+    #pip-video {
+      position: fixed; left: 20px; bottom: 20px; width: 200px;
+      border-radius: 10px; transform: scaleX(-1); z-index: 10;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.15);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="app-canvas"></canvas>
+  <video id="debug-video" autoplay playsinline></video>
+  <video id="pip-video" autoplay playsinline></video>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.22.0/dist/tf-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.22.0/dist/tf-converter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.22.0/dist/tf-backend-webgl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection@2.0.1/dist/hand-pose-detection.min.js"></script>
+
+  <script>
+    // --- DOM refs ---
+    const canvas = document.getElementById('app-canvas');
+    const ctx = canvas.getContext('2d');
+    const debugVideo = document.getElementById('debug-video');
+    const pipVideo = document.getElementById('pip-video');
+
+    // --- resize ---
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let lastTime = performance.now();
+
+    // --- Handpose ---
+    let detector = null;
+    let handData = null;
+
+    async function setupHandpose() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      debugVideo.srcObject = stream;
+      pipVideo.srcObject = stream;
+      await debugVideo.play();
+      await pipVideo.play();
+
+      const model = handPoseDetection.SupportedModels.MediaPipeHands;
+      detector = await handPoseDetection.createDetector(model, {
+        runtime: 'mediapipe',
+        modelType: 'full',
+        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240',
+        maxHands: 1,
+      });
+    }
+
+    function getFingerTips(landmarks) {
+      if (!landmarks || landmarks.length === 0) return null;
+      const hand = landmarks[0];
+      const flipX = (x) => (debugVideo.videoWidth - x) * (canvas.width / debugVideo.videoWidth);
+      const toY = (y) => y * (canvas.height / debugVideo.videoHeight);
+      return {
+        indexTip: { x: flipX(hand.keypoints[8].x), y: toY(hand.keypoints[8].y) },
+        thumbTip: { x: flipX(hand.keypoints[4].x), y: toY(hand.keypoints[4].y) },
+        landmarks: hand,
+      };
+    }
+
+    async function detectHands() {
+      if (!detector || debugVideo.readyState < 2) return;
+      const hands = await detector.estimateHands(debugVideo);
+      handData = getFingerTips(hands);
+    }
+
+    // --- Background ---
+    const bgColors = [
+      [255, 182, 193],
+      [173, 216, 230],
+      [216, 191, 255],
+      [255, 218, 185],
+      [179, 255, 206],
+    ];
+    let bgColorA = bgColors[0];
+    let bgLerp = 0;
+    let bgTargetPair = [bgColors[1], bgColors[2]];
+
+    function updateBackground(dt) {
+      bgLerp += dt * 0.05;
+      if (bgLerp >= 1) {
+        bgLerp = 0;
+        bgColorA = bgTargetPair[0];
+        let available = bgColors.filter(c => c !== bgTargetPair[0] && c !== bgTargetPair[1]);
+        let next = available[Math.floor(Math.random() * available.length)];
+        bgTargetPair = [bgTargetPair[1], next];
+      }
+    }
+
+    function renderBackground() {
+      const a = bgColorA;
+      const b = bgTargetPair[0];
+      const t = bgLerp;
+      const r = Math.round(a[0] + (b[0] - a[0]) * t);
+      const g = Math.round(a[1] + (b[1] - a[1]) * t);
+      const bl = Math.round(a[2] + (b[2] - a[2]) * t);
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, `rgb(${r},${g},${bl})`);
+      grad.addColorStop(1, `rgb(${bl},${r},${g})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // --- Bubble System ---
+    const BUBBLE_COUNT = 15;
+    const BUBBLE_MIN_R = 30;
+    const BUBBLE_MAX_R = 80;
+    const BUBBLE_COLORS = [
+      '#ffb6c1', '#87ceeb', '#d8b4fe', '#ffdab9', '#b3ffce',
+      '#fda4af', '#67e8f9', '#c4b5fd', '#fdba74', '#86efac',
+    ];
+
+    let bubbles = [];
+
+    function createBubble() {
+      const r = BUBBLE_MIN_R + Math.random() * (BUBBLE_MAX_R - BUBBLE_MIN_R);
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: r,
+        color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
+        phase: Math.random() * Math.PI * 2,
+        speed: 15 + Math.random() * 25,
+        alive: true,
+        popTimer: 0,
+      };
+    }
+
+    function initBubbles() {
+      bubbles = [];
+      for (let i = 0; i < BUBBLE_COUNT; i++) {
+        bubbles.push(createBubble());
+      }
+    }
+    initBubbles();
+
+    function updateBubbles(dt) {
+      for (const b of bubbles) {
+        if (!b.alive) {
+          b.popTimer -= dt;
+          if (b.popTimer <= 0) {
+            Object.assign(b, createBubble());
+          }
+          continue;
+        }
+        b.phase += dt * b.speed * 0.01;
+        b.x += Math.sin(b.phase) * 0.8;
+        b.y -= Math.cos(b.phase) * 0.4;
+        if (b.x < -b.r) b.x = canvas.width + b.r;
+        if (b.x > canvas.width + b.r) b.x = -b.r;
+        if (b.y < -b.r) b.y = canvas.height + b.r;
+        if (b.y > canvas.height + b.r) b.y = -b.r;
+      }
+    }
+
+    function renderBubbles() {
+      for (const b of bubbles) {
+        if (!b.alive) continue;
+        const grad = ctx.createRadialGradient(b.x - b.r*0.3, b.y - b.r*0.3, 0, b.x, b.y, b.r);
+        grad.addColorStop(0, 'rgba(255,255,255,0.8)');
+        grad.addColorStop(0.3, b.color);
+        grad.addColorStop(1, 'rgba(255,255,255,0.1)');
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(b.x - b.r*0.25, b.y - b.r*0.25, b.r*0.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fill();
+      }
+    }
+
+    // --- Pinch ---
+    const PINCH_THRESHOLD = 35;
+    let isPinching = false;
+
+    function updatePinch() {
+      if (!handData) { isPinching = false; return; }
+      const dx = handData.indexTip.x - handData.thumbTip.x;
+      const dy = handData.indexTip.y - handData.thumbTip.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      isPinching = dist < PINCH_THRESHOLD;
+    }
+
+    function renderCursor() {
+      if (!handData) return;
+      const p = handData.indexTip;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = isPinching ? 'rgba(255,100,100,0.6)' : 'rgba(255,255,255,0.5)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // --- Pop ---
+    const POP_MARGIN = 10;
+    function randomRespawnDelay() { return 2 + Math.random(); }
+
+    function detectPop() {
+      if (!isPinching || !handData) return;
+      const points = [handData.indexTip, handData.thumbTip];
+      let closest = null;
+      let closestDist = Infinity;
+
+      for (const b of bubbles) {
+        if (!b.alive) continue;
+        for (const p of points) {
+          const dx = p.x - b.x;
+          const dy = p.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) - b.r;
+          if (dist < POP_MARGIN && dist < closestDist) {
+            closestDist = dist;
+            closest = b;
+          }
+        }
+      }
+
+      if (closest) {
+        popBubble(closest);
+      }
+    }
+
+    // --- Particles ---
+    let particles = [];
+    const PARTICLE_COUNT = 20;
+
+    function spawnParticles(x, y, color) {
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 50 + Math.random() * 150;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 2 + Math.random() * 4,
+          color: color,
+          life: 0.6,
+          maxLife: 0.6,
+        });
+      }
+    }
+
+    function updateParticles(dt) {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 120 * dt;
+        p.life -= dt;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function renderParticles() {
+      for (const p of particles) {
+        const alpha = Math.max(0, p.life / p.maxLife);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // --- Sound ---
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playPopSound(bubbleRadius) {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      const baseFreq = 400 + (bubbleRadius / BUBBLE_MAX_R) * 400;
+      osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.3, audioCtx.currentTime + 0.08);
+
+      const volume = 0.15 + (bubbleRadius / BUBBLE_MAX_R) * 0.15;
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function popBubble(bubble) {
+      bubble.alive = false;
+      bubble.popTimer = randomRespawnDelay();
+      spawnParticles(bubble.x, bubble.y, bubble.color);
+      playPopSound(bubble.r);
+    }
+
+    async function start() {
+      await setupHandpose();
+      lastTime = performance.now();
+
+      function loop() {
+        const now = performance.now();
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+
+        detectHands().then(() => {
+          updatePinch();
+          detectPop();
+          updateBackground(dt);
+          updateBubbles(dt);
+          updateParticles(dt);
+
+          renderBackground();
+          renderBubbles();
+          renderParticles();
+          renderCursor();
+
+          requestAnimationFrame(loop);
+        });
+      }
+      loop();
+    }
+    start().catch(console.error);
+  </script>
+</body>
+</html>
