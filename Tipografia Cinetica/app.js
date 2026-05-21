@@ -400,31 +400,22 @@ setupControls()
 
 // === Navbar ===
 const langBtn = document.getElementById('lang-toggle')
-const currentLang = localStorage.getItem('lang') || 'it'
+let lang = localStorage.getItem('lang') || 'it'
 
-document.querySelectorAll('[data-section]').forEach(el => {
-  if (el.dataset[currentLang]) el.textContent = el.dataset[currentLang]
-})
-langBtn.textContent = langBtn.dataset[currentLang] || langBtn.dataset.it
-
-document.querySelectorAll('[data-section]').forEach(el => {
-  el.addEventListener('click', e => {
-    e.preventDefault()
-    const section = el.dataset.section
-    if (section === 'hero') {
-      window.location.href = '../index.html'
-    } else {
-      window.location.href = `../index.html#${section}`
-    }
+function applyLang(l) {
+  lang = l
+  localStorage.setItem('lang', l)
+  document.querySelectorAll('[data-it],[data-en]').forEach(el => {
+    if (el.dataset[l]) el.textContent = el.dataset[l]
   })
-})
+  langBtn.textContent = l === 'it' ? 'EN' : 'IT'
+}
 
 langBtn.addEventListener('click', () => {
-  const current = localStorage.getItem('lang') || 'it'
-  const next = current === 'it' ? 'en' : 'it'
-  localStorage.setItem('lang', next)
-  window.location.href = '../index.html'
+  applyLang(lang === 'it' ? 'en' : 'it')
 })
+
+applyLang(lang)
 
 // === Init ===
 loadFont(state.font).then(() => {
