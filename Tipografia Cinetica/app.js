@@ -2,15 +2,15 @@ import { vertexShaderSource, fragmentShaderSource } from './shaders.js'
 
 // === State ===
 const state = {
-  word: 'SHAKE',
+  word: 'ANSIA',
   font: 'Lato',
   color: '#FF6B6B',
   fillOpacity: 1.0,
   strokeWidth: 2,
   strokeColor: '#FFFFFF',
   strokeOpacity: 1.0,
-  noiseIntensity: 0.8,
-  speed: 1.5,
+  noiseIntensity: 0.45,
+  speed: 3.7,
 }
 
 // === Canvas & WebGL Setup ===
