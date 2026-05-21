@@ -398,6 +398,14 @@ function setupControls() {
 }
 setupControls()
 
+// === Navbar ===
+document.getElementById('lang-toggle').addEventListener('click', () => {
+  const current = localStorage.getItem('lang') || 'it'
+  const next = current === 'it' ? 'en' : 'it'
+  localStorage.setItem('lang', next)
+  window.location.href = '../index.html'
+})
+
 // === Init ===
 loadFont(state.font).then(() => {
   textNeedsRedraw = true
