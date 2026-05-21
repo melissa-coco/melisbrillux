@@ -399,7 +399,27 @@ function setupControls() {
 setupControls()
 
 // === Navbar ===
-document.getElementById('lang-toggle').addEventListener('click', () => {
+const langBtn = document.getElementById('lang-toggle')
+const currentLang = localStorage.getItem('lang') || 'it'
+
+document.querySelectorAll('[data-section]').forEach(el => {
+  if (el.dataset[currentLang]) el.textContent = el.dataset[currentLang]
+})
+langBtn.textContent = langBtn.dataset[currentLang] || langBtn.dataset.it
+
+document.querySelectorAll('[data-section]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault()
+    const section = el.dataset.section
+    if (section === 'hero') {
+      window.location.href = '../index.html'
+    } else {
+      window.location.href = `../index.html#${section}`
+    }
+  })
+})
+
+langBtn.addEventListener('click', () => {
   const current = localStorage.getItem('lang') || 'it'
   const next = current === 'it' ? 'en' : 'it'
   localStorage.setItem('lang', next)
