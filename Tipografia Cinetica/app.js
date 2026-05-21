@@ -60,6 +60,7 @@ function initShaders() {
     uNoiseIntensity: gl.getUniformLocation(program, 'uNoiseIntensity'),
     uSpeed: gl.getUniformLocation(program, 'uSpeed'),
     uColor: gl.getUniformLocation(program, 'uColor'),
+    uStrokeColor: gl.getUniformLocation(program, 'uStrokeColor'),
   }
 }
 
@@ -132,11 +133,13 @@ function renderTextToCanvas() {
 
   offCtx.textAlign = 'center'
   offCtx.textBaseline = 'middle'
-  offCtx.strokeStyle = state.strokeColor
-  offCtx.lineWidth = state.strokeWidth
-  offCtx.lineJoin = 'round'
-  offCtx.strokeText(state.word, w / 2, h / 2)
-  offCtx.fillStyle = '#ffffff'
+  if (state.strokeWidth > 0) {
+    offCtx.strokeStyle = '#00ff00'
+    offCtx.lineWidth = state.strokeWidth
+    offCtx.lineJoin = 'round'
+    offCtx.strokeText(state.word, w / 2, h / 2)
+  }
+  offCtx.fillStyle = '#ff0000'
   offCtx.fillText(state.word, w / 2, h / 2)
 }
 
@@ -181,6 +184,8 @@ function loop() {
 
   const [r, g, b] = hexToRgb(state.color)
   gl.uniform3f(uLocations.uColor, r, g, b)
+  const [sr, sg, sb] = hexToRgb(state.strokeColor)
+  gl.uniform3f(uLocations.uStrokeColor, sr, sg, sb)
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
