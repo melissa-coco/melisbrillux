@@ -208,8 +208,10 @@ function updateBackground() {
   const container = document.getElementById('canvas-container')
   if (state.bgEnabled) {
     container.style.background = state.bgColor
+    canvas.style.background = state.bgColor
   } else {
     container.style.background = 'transparent'
+    canvas.style.background = 'transparent'
   }
 }
 
