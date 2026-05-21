@@ -249,59 +249,6 @@ function exportVideo() {
   }, 3000)
 }
 
-function loadGifJs() {
-  return new Promise((resolve, reject) => {
-    if (window.GIF) { resolve(window.GIF); return }
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js'
-    script.onload = () => resolve(window.GIF)
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
-}
-
-async function exportGif() {
-  const btn = document.getElementById('export-gif-btn')
-  btn.textContent = '⏺ GIF...'
-  btn.disabled = true
-  try {
-    const GIF = await loadGifJs()
-    const totalFrames = 60
-    const fps = 20
-    const gif = new GIF({
-      workers: 2,
-      quality: 10,
-      width: canvas.width,
-      height: canvas.height,
-    })
-    const tempCanvas = document.createElement('canvas')
-    tempCanvas.width = canvas.width
-    tempCanvas.height = canvas.height
-    const tempCtx = tempCanvas.getContext('2d')
-    for (let i = 0; i < totalFrames; i++) {
-      tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height)
-      tempCtx.drawImage(canvas, 0, 0)
-      gif.addFrame(tempCtx, { copy: true, delay: 1000 / fps })
-      await new Promise(r => setTimeout(r, 1000 / fps))
-    }
-    gif.on('finished', blob => {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${state.word}.gif`
-      a.click()
-      URL.revokeObjectURL(url)
-      btn.textContent = '▶ GIF'
-      btn.disabled = false
-    })
-    gif.render()
-  } catch (e) {
-    btn.textContent = '▶ GIF'
-    btn.disabled = false
-    alert('Errore caricamento GIF library')
-  }
-}
-
 // === Font Loading ===
 function loadFont(family) {
   return new Promise((resolve) => {
@@ -379,7 +326,6 @@ function buildControls() {
     </div>
     <div class="controls-actions">
       <button class="btn btn-primary" id="export-video-btn">▶ Esporta MP4</button>
-      <button class="btn btn-secondary" id="export-gif-btn">▶ GIF</button>
     </div>
   `
 }
@@ -449,7 +395,6 @@ function setupControls() {
   })
 
   document.getElementById('export-video-btn').addEventListener('click', exportVideo)
-  document.getElementById('export-gif-btn').addEventListener('click', exportGif)
 }
 setupControls()
 
