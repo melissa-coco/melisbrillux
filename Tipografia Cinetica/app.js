@@ -399,6 +399,17 @@ langBtn.addEventListener('click', () => {
   applyLang(lang === 'it' ? 'en' : 'it')
 })
 
+window.addEventListener('pageshow', (e) => {
+  const saved = localStorage.getItem('lang') || 'it'
+  applyLang(saved)
+  if (e.persisted) {
+    texture = null
+    textNeedsRedraw = true
+    resizeCanvas()
+    if (!rafId) loop()
+  }
+})
+
 applyLang(lang)
 
 // === Init ===
