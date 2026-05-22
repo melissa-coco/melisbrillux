@@ -276,7 +276,7 @@ function buildControls() {
     </div>
     <div class="control-group">
       <label for="stroke-width-slider">Spessore contorno: <span id="stroke-width-value">${state.strokeWidth}px</span></label>
-      <input type="range" id="stroke-width-slider" min="0" max="10" step="1" value="${state.strokeWidth}">
+      <input type="range" id="stroke-width-slider" min="0" max="50" step="1" value="${state.strokeWidth}">
     </div>
     <div class="control-group">
       <label for="fill-opacity-slider">Opacità riempimento: <span id="fill-opacity-value">${state.fillOpacity.toFixed(2)}</span></label>
