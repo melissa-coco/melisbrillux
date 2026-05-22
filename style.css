@@ -286,8 +286,8 @@ h1::after {
 
 
 .works-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   padding: 16px 48px 16px 0;
 }
@@ -302,20 +302,9 @@ h1::after {
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.1);
-  min-height: 140px;
-}
-
-.works-card:nth-child(1) {
-  grid-row: 1 / 3;
-  min-height: 300px;
-}
-
-.works-card:nth-child(2) {
-  grid-column: 2 / 4;
-}
-
-.works-card:nth-child(5) {
-  grid-column: 1 / 4;
+  width: calc((100% - 48px) / 3);
+  aspect-ratio: 3 / 2;
+  animation: glitchCard 4s infinite;
 }
 
 .works-card::before,
@@ -335,6 +324,30 @@ h1::after {
 }
 
 .works-card::after {
+  background: rgba(0,200,255,0.4);
+  animation: glitchCyan 4s infinite 0.02s;
+}
+
+.works-card::before,
+.works-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.works-card:hover::before {
+  opacity: 1;
+  background: rgba(255,0,0,0.4);
+  animation: glitchRed 4s infinite;
+}
+
+.works-card:hover::after {
+  opacity: 1;
   background: rgba(0,200,255,0.4);
   animation: glitchCyan 4s infinite 0.02s;
 }
@@ -362,10 +375,6 @@ h1::after {
   91% { opacity: 1; transform: translate(-3px, 1px); }
   93% { opacity: 1; transform: translate(2px, 0); }
   95% { opacity: 1; transform: translate(0); }
-}
-
-.works-card {
-  animation: glitchCard 4s infinite;
 }
 
 .works-card:nth-child(2) { animation-duration: 4.5s; }

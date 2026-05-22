@@ -297,7 +297,7 @@ main {
 }
 
 .polaroid img,
-.polaroid .placeholder-img {
+.polaroid .placeholder-img { src: <img src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=600&amp;">
   display: block;
   width: 100%;
   height: auto;
@@ -326,6 +326,7 @@ main {
   color: var(--bianco);
   font-family: var(--font-titoli);
   font-size: 1.2rem;
+
 }
 
 .postit {
