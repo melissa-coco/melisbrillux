@@ -14,7 +14,7 @@
   --postit: #FFF9C4;
   --ombra: rgba(44, 24, 16, 0.12);
   --riga: #DDD6CB;
-  --font-titoli: 'Caveat', 'Comic Sans MS', cursive;
+  --font-titoli: 'Lato', sans-serif;
   --font-testo: 'Lato', 'Segoe UI', sans-serif;
 }
 
@@ -65,8 +65,8 @@ body::after {
 }
 
 h1, h2, h3 {
-  font-family: var(--font-titoli);
-  font-weight: 700;
+  font-family: 'Emilys Candy', cursive;
+  font-weight: 400;
   line-height: 1.2;
   color: var(--inchiostro);
 }
@@ -81,22 +81,14 @@ a:hover {
   color: var(--rosso);
 }
 
-.top-bar {
-  height: 6px;
-  background: linear-gradient(to right, var(--verde) 33%, var(--bianco) 33%, var(--bianco) 66%, var(--rosso) 66%);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
+
 
 header {
   background: rgba(245, 240, 232, 0.95);
   backdrop-filter: blur(4px);
   border-bottom: 2px solid var(--carta-scura);
   position: fixed;
-  top: 6px;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 99;
@@ -181,59 +173,118 @@ main {
 
 .hero {
   text-align: center;
-  padding: 48px 0 32px;
+  padding: 64px 0 42px;
   position: relative;
 }
 
 .hero h1 {
-  font-size: 4rem;
-  margin-bottom: 4px;
+  font-family: 'Emilys Candy', cursive;
+  font-size: 8rem;
+  margin-bottom: 8px;
   position: relative;
   display: inline-block;
+  line-height: 1;
 }
 
 .hero h1::after {
   content: '';
   display: block;
   width: 80%;
-  height: 4px;
+  height: 6px;
   background: var(--inchiostro);
-  margin: 4px auto 0;
+  margin: 8px auto 0;
   border-radius: 2px;
   opacity: 0.5;
 }
 
 .hero .tagline {
   font-family: var(--font-titoli);
-  font-size: 1.4rem;
-  color: var(--verde);
-  margin-top: 8px;
+  font-size: 1.8rem;
+  color: #D44A6E;
+  margin-top: 12px;
 }
 
 .hero .separator {
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(to right, var(--verde), var(--bianco), var(--rosso));
-  margin: 20px auto;
+  width: 80px;
+  height: 4px;
+  background: #D44A6E;
+  margin: 28px auto;
   border-radius: 2px;
 }
 
 .hero-doodle-left {
   position: absolute;
-  left: -40px;
-  top: 30px;
-  width: 50px;
-  height: 50px;
+  left: -50px;
+  top: 40px;
+  width: 65px;
+  height: 65px;
   opacity: 0.3;
 }
 
 .hero-doodle-right {
   position: absolute;
-  right: -40px;
-  bottom: 30px;
+  right: -50px;
+  bottom: 40px;
+  width: 52px;
+  height: 52px;
+  opacity: 0.3;
+}
+
+.doodle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.doodle-cloud {
+  right: -60px;
+  top: 10px;
+  width: 90px;
+  height: 60px;
+  opacity: 0.2;
+  transform: rotate(5deg);
+}
+
+.doodle-star2 {
+  left: -30px;
+  bottom: 10px;
   width: 40px;
   height: 40px;
-  opacity: 0.3;
+  transform: rotate(-10deg);
+}
+
+.doodle-scribble {
+  left: 50%;
+  bottom: -10px;
+  width: 80px;
+  height: 48px;
+  margin-left: 60px;
+  opacity: 0.2;
+  transform: rotate(15deg);
+}
+
+.doodle-flower-polaroid {
+  right: -30px;
+  bottom: -20px;
+  width: 55px;
+  height: 55px;
+  transform: rotate(8deg);
+}
+
+.doodle-heart-about {
+  left: -35px;
+  top: 50%;
+  width: 45px;
+  height: 45px;
+  transform: rotate(-15deg);
+}
+
+.doodle-spiral-postit {
+  right: -25px;
+  bottom: -25px;
+  width: 60px;
+  height: 60px;
+  transform: rotate(20deg);
 }
 
 .polaroid {
@@ -335,17 +386,6 @@ main {
   display: inline-block;
 }
 
-.section-title::after {
-  content: '';
-  display: block;
-  width: 60%;
-  height: 3px;
-  background: var(--inchiostro);
-  margin-top: 4px;
-  border-radius: 2px;
-  opacity: 0.3;
-}
-
 .recipe-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -421,19 +461,19 @@ main {
 }
 
 .recipe-header {
-  margin-bottom: 32px;
+  margin-bottom: 42px;
 }
 
 .recipe-header h1 {
-  font-size: 3rem;
-  margin-bottom: 2px;
+  font-size: 4rem;
+  margin-bottom: 4px;
 }
 
 .recipe-header .meta {
   font-family: var(--font-testo);
   color: #999;
-  font-size: 0.95rem;
-  margin-bottom: 20px;
+  font-size: 1.2rem;
+  margin-bottom: 28px;
 }
 
 .recipe-section {
@@ -566,7 +606,7 @@ main {
   font-size: 1.8rem;
   margin-bottom: 12px;
   color: var(--verde);
-  font-family: var(--font-titoli);
+  font-family: 'Emilys Candy', cursive;
 }
 
 .about-card p {
@@ -646,14 +686,7 @@ footer p {
   opacity: 0.8;
 }
 
-footer .tricolore {
-  display: inline-block;
-  width: 40px;
-  height: 4px;
-  background: linear-gradient(to right, var(--verde), var(--bianco), var(--rosso));
-  border-radius: 2px;
-  margin-bottom: 10px;
-}
+
 
 @media (min-width: 600px) {
   .recipe-grid {
@@ -692,11 +725,11 @@ footer .tricolore {
   }
 
   .hero h1 {
-    font-size: 2.8rem;
+    font-size: 3.6rem;
   }
 
   .recipe-header h1 {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
   }
 
   body::after {

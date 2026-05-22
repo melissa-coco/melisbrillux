@@ -45,6 +45,7 @@ function applyLang(l) {
   document.querySelectorAll('.about-card:nth-child(2) .about-text').forEach(el => el.textContent = dict.aboutAbadir);
   document.querySelectorAll('.about-card:nth-child(3) .about-text').forEach(el => el.textContent = dict.aboutWs);
   document.querySelectorAll('#contact h2').forEach(el => el.textContent = dict.contactTitle);
+  document.querySelectorAll('.contact-copy').forEach(el => el.textContent = dict.contactCopy);
   document.querySelectorAll('.about-content p').forEach(el => el.textContent = dict.aboutBio);
   document.querySelectorAll('.contact-email').forEach(el => el.textContent = dict.contactEmail);
   document.querySelectorAll('#lang-toggle').forEach(el => el.textContent = dict.langBtn);
@@ -70,9 +71,8 @@ for (const p of projects) {
   card.className = 'works-card';
   card.href = p.url;
 
-  card.style.background = p.color;
-
   card.innerHTML = `
+    <div class="works-card-glass"></div>
     <div class="works-card-info">
       <h3>${p.title}</h3>
     </div>

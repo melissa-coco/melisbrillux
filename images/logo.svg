@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="500" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Extended+Text&amp;display=swap');
+    </style>
+    <linearGradient id="lava" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0f0"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </linearGradient>
+    <filter id="neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0" result="text"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="glow1"/>
+      <feFlood flood-color="#ff4444" result="r"/>
+      <feFlood flood-color="#44ff44" result="g"/>
+      <feFlood flood-color="#4cf9e1" result="c"/>
+      <feComposite in="r" in2="glow1" operator="in" result="rGlow"/>
+      <feComposite in="g" in2="glow1" operator="in" result="gGlow"/>
+      <feComposite in="c" in2="glow1" operator="in" result="cGlow"/>
+      <feOffset dx="-6" dy="0" in="rGlow" result="rOffset"/>
+      <feOffset dx="6" dy="0" in="gGlow" result="gOffset"/>
+      <feMerge>
+        <feMergeNode in="rOffset"/>
+        <feMergeNode in="gOffset"/>
+        <feMergeNode in="gGlow"/>
+        <feMergeNode in="cGlow"/>
+        <feMergeNode in="text"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="500" height="120" rx="12" fill="#0a0a0a"/>
+  <text x="250" y="74" font-family="'Libre Barcode 39 Extended Text', 'Courier New', monospace" font-size="52" fill="#f0f0f0" text-anchor="middle" letter-spacing="6" filter="url(#neon)">MELISSA COCO</text>
+</svg>

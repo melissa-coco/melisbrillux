@@ -14,12 +14,35 @@
       border-radius: 10px; transform: scaleX(-1); z-index: 10;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.15);
     }
+    #start-screen {
+      position: fixed; inset: 0; z-index: 20;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.7);
+      color: #fff; font-family: system-ui, sans-serif;
+      text-align: center; padding: 24px;
+    }
+    #start-screen h1 { font-size: 2rem; margin-bottom: 8px; }
+    #start-screen p { font-size: 1rem; opacity: 0.8; margin-bottom: 24px; }
+    #start-btn {
+      padding: 14px 40px; font-size: 1.1rem;
+      border: none; border-radius: 50px;
+      background: linear-gradient(135deg, #ffb6c1, #87ceeb);
+      color: #111; font-weight: 700; cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #start-btn:hover { transform: scale(1.05); }
   </style>
 </head>
 <body>
   <canvas id="app-canvas"></canvas>
   <video id="debug-video" autoplay playsinline></video>
   <video id="pip-video" autoplay playsinline></video>
+  <div id="start-screen">
+    <h1>Bubble Pop</h1>
+    <p>Scoppia almeno <strong>10 bolle</strong> in <strong>30 secondi</strong> usando le mani!</p>
+    <button id="start-btn">INIZIA</button>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.22.0/dist/tf-core.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.22.0/dist/tf-converter.min.js"></script>
@@ -43,6 +66,21 @@
     resize();
 
     let lastTime = performance.now();
+
+    // --- Game State ---
+    let score = 0;
+    let timeRemaining = 30;
+    let gameActive = false;
+    let gameOver = false;
+    let gameResult = null;
+
+    function resetGame() {
+      score = 0;
+      timeRemaining = 30;
+      gameActive = true;
+      gameOver = false;
+      gameResult = null;
+    }
 
     // --- Handpose ---
     let detector = null;
@@ -241,6 +279,82 @@
       }
     }
 
+    // --- Score Float Text ---
+    let scoreFloats = [];
+
+    function spawnScoreFloat(x, y) {
+      scoreFloats.push({ x, y, life: 1, vy: -80 });
+    }
+
+    function updateScoreFloats(dt) {
+      for (let i = scoreFloats.length - 1; i >= 0; i--) {
+        const f = scoreFloats[i];
+        f.y += f.vy * dt;
+        f.life -= dt * 1.2;
+        if (f.life <= 0) scoreFloats.splice(i, 1);
+      }
+    }
+
+    function renderScoreFloats() {
+      for (const f of scoreFloats) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, f.life);
+        ctx.font = 'bold 28px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 8;
+        ctx.fillText('+1', f.x, f.y);
+        ctx.restore();
+      }
+    }
+
+    // --- Confetti ---
+    let confetti = [];
+
+    function spawnConfetti(count) {
+      const colors = ['#ffb6c1','#87ceeb','#d8b4fe','#ffdab9','#b3ffce','#fda4af','#67e8f9','#c4b5fd','#fdba74','#86efac','#ffeb3b','#ff6b6b'];
+      for (let i = 0; i < count; i++) {
+        confetti.push({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * 100,
+          w: 6 + Math.random() * 8,
+          h: 4 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 200,
+          vy: 100 + Math.random() * 200,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 6,
+          life: 2 + Math.random() * 2,
+        });
+      }
+    }
+
+    function updateConfetti(dt) {
+      for (let i = confetti.length - 1; i >= 0; i--) {
+        const c = confetti[i];
+        c.x += c.vx * dt;
+        c.y += c.vy * dt;
+        c.vy += 120 * dt;
+        c.rot += c.rotSpeed * dt;
+        c.life -= dt;
+        if (c.life <= 0 || c.y > canvas.height + 50) confetti.splice(i, 1);
+      }
+    }
+
+    function renderConfetti() {
+      for (const c of confetti) {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rot);
+        ctx.globalAlpha = Math.min(1, c.life);
+        ctx.fillStyle = c.color;
+        ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+        ctx.restore();
+      }
+    }
+
     // --- Particles ---
     let particles = [];
     const PARTICLE_COUNT = 20;
@@ -295,11 +409,13 @@
       }
     }
 
-    function playPopSound(bubbleRadius) {
+    function ensureAudio() {
       initAudio();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playPopSound(bubbleRadius) {
+      ensureAudio();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
@@ -318,16 +434,178 @@
       osc.stop(audioCtx.currentTime + 0.1);
     }
 
+    function playTickSound() {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.06);
+    }
+
+    function playWinSound() {
+      ensureAudio();
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        const t = audioCtx.currentTime + i * 0.12;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.2, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      });
+    }
+
+    function playLoseSound() {
+      ensureAudio();
+      const notes = [400, 350, 300, 200];
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        const t = audioCtx.currentTime + i * 0.15;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.12, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      });
+    }
+
     function popBubble(bubble) {
       bubble.alive = false;
       bubble.popTimer = randomRespawnDelay();
       spawnParticles(bubble.x, bubble.y, bubble.color);
       playPopSound(bubble.r);
+      if (gameActive) {
+        score++;
+        spawnScoreFloat(bubble.x, bubble.y - 20);
+      }
+    }
+
+    function renderHUD() {
+      if (!gameActive && !gameOver) return;
+      ctx.save();
+
+      const cx = canvas.width / 2;
+      const lowTime = timeRemaining <= 10;
+      const pulse = lowTime ? 1 + Math.sin(performance.now() / 150) * 0.06 : 1;
+
+      // --- Timer bar (bottom center) ---
+      const barW = Math.min(400, canvas.width - 80);
+      const barH = 10;
+      const barX = (canvas.width - barW) / 2;
+      const barY = canvas.height - 60;
+      const fill = timeRemaining / 30;
+
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 6;
+
+      // background bar
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.roundRect(barX, barY, barW, barH, 5);
+      ctx.fill();
+
+      // fill bar
+      const barColor = fill > 0.33 ? '#87ceeb' : fill > 0.15 ? '#ffdab9' : '#ff6b6b';
+      ctx.fillStyle = barColor;
+      ctx.beginPath();
+      ctx.roundRect(barX, barY, barW * fill, barH, 5);
+      ctx.fill();
+
+      // timer text
+      ctx.shadowBlur = 0;
+      ctx.font = `bold ${Math.round(18 * pulse)}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = lowTime ? '#ff6b6b' : '#fff';
+      ctx.fillText(Math.ceil(timeRemaining) + 's', cx, barY - 6);
+
+      // --- Score badge (bottom right) ---
+      const badgeX = canvas.width - 170;
+      const badgeY = canvas.height - 56;
+      const badgeW = 154;
+      const badgeH = 44;
+
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 12);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.font = 'bold 24px system-ui, sans-serif';
+      ctx.fillStyle = score >= 10 ? '#b3ffce' : '#fff';
+      ctx.fillText('' + score + ' / 10', badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+      ctx.restore();
+    }
+
+    function renderGameOver() {
+      if (!gameOver) return;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 20;
+
+      if (gameResult === 'win') {
+        ctx.font = 'bold 56px system-ui, sans-serif';
+        ctx.fillStyle = '#b3ffce';
+        ctx.fillText('VITTORIA!', cx, cy - 50);
+        ctx.shadowBlur = 0;
+        ctx.font = '26px system-ui, sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`${score} bolle scoppiate!`, cx, cy + 15);
+      } else {
+        ctx.font = 'bold 52px system-ui, sans-serif';
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fillText('TEMPO SCADUTO!', cx, cy - 50);
+        ctx.shadowBlur = 0;
+        ctx.font = '24px system-ui, sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`Solo ${score} bolle su 10`, cx, cy + 15);
+      }
+
+      ctx.font = '16px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('Muovi la mano per ricominciare', cx, cy + 65);
+
+      ctx.restore();
     }
 
     async function start() {
       await setupHandpose();
       lastTime = performance.now();
+
+      let moveCountdown = 0;
+      let lastTickSecond = -1;
+      let gameEnded = false;
 
       function loop() {
         const now = performance.now();
@@ -337,20 +615,77 @@
         detectHands().then(() => {
           updatePinch();
           detectPop();
+
+          if (gameActive) {
+            timeRemaining -= dt;
+
+            const curSec = Math.ceil(timeRemaining);
+            if (curSec <= 10 && curSec > 0 && curSec !== lastTickSecond) {
+              playTickSound();
+              lastTickSecond = curSec;
+            }
+
+            if (timeRemaining <= 0) {
+              timeRemaining = 0;
+              gameActive = false;
+              gameOver = true;
+              gameResult = score >= 10 ? 'win' : 'lose';
+              moveCountdown = 2;
+              gameEnded = false;
+            }
+          }
+
+          if (gameOver && !gameEnded) {
+            gameEnded = true;
+            if (gameResult === 'win') {
+              spawnConfetti(120);
+              playWinSound();
+            } else {
+              playLoseSound();
+            }
+          }
+
+          if (gameOver) {
+            if (handData) {
+              moveCountdown -= dt;
+              if (moveCountdown <= 0) {
+                resetGame();
+                moveCountdown = 0;
+                lastTickSecond = -1;
+                confetti = [];
+                gameEnded = false;
+              }
+            } else {
+              moveCountdown = 2;
+            }
+          }
+
           updateBackground(dt);
           updateBubbles(dt);
           updateParticles(dt);
+          updateScoreFloats(dt);
+          updateConfetti(dt);
 
           renderBackground();
           renderBubbles();
           renderParticles();
+          renderScoreFloats();
+          renderConfetti();
           renderCursor();
+          renderHUD();
+          renderGameOver();
 
           requestAnimationFrame(loop);
         });
       }
       loop();
     }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      document.getElementById('start-screen').style.display = 'none';
+      resetGame();
+    });
+
     start().catch(console.error);
   </script>
 </body>

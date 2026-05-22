@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Girandola Sonora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Extended+Text&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -11,13 +15,74 @@
       background: #caf0f8;
       display: flex;
       flex-direction: column;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 32px;
+      background: rgba(10,10,10,0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .nav-inner {
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Libre Barcode 39 Extended Text', cursive;
+      font-size: 23px;
+      color: #f0f0f0;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 27px;
+    }
+
+    .nav-links a {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #f0f0f0;
+    }
+
+    #lang-toggle {
+      background: none;
+      border: 1px solid #555;
+      color: #f0f0f0;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: "Lato", sans-serif;
+      font-weight: 700;
+      transition: border-color 0.2s;
+      line-height: 1;
+    }
+
+    #lang-toggle:hover {
+      border-color: #f0f0f0;
     }
 
     #app {
       display: flex;
       flex-direction: column;
       height: 100vh;
+      padding-top: 56px;
     }
 
     #pinwheel-container {
@@ -26,6 +91,7 @@
       align-items: center;
       justify-content: center;
       min-height: 0;
+      padding-top: 80px;
     }
 
     #girandola {
@@ -56,47 +122,66 @@
     }
 
     #controls {
-      background: #2a2a2a;
-      padding: 16px 24px;
+      background: rgba(20, 20, 20, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 14px 20px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 6px;
       flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
 
     .control-group {
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: #ccc;
-      font-size: 14px;
+      gap: 6px;
+      color: #999;
+      font-size: 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .control-group label {
       white-space: nowrap;
-      min-width: 40px;
+      min-width: auto;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: #777;
+    }
+
+    .control-group:first-child {
+      background: none;
+      border: none;
+      padding: 0;
     }
 
     #mic-btn {
-      background: #444;
-      border: 2px solid #666;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 24px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #ccc;
+      padding: 8px 18px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
+      font-size: 13px;
+      transition: all 0.25s;
+      font-weight: 500;
+      letter-spacing: 0.3px;
     }
 
-    #mic-btn:hover { background: #555; }
-    #mic-btn.active { border-color: #4caf50; background: #2e7d32; }
+    #mic-btn:hover { background: rgba(255,255,255,0.1); }
+    #mic-btn.active { background: rgba(46,125,50,0.3); border-color: #4caf50; color: #81c784; }
 
     #sound-level {
-      flex: 1;
-      min-width: 120px;
-      height: 8px;
-      background: #444;
-      border-radius: 4px;
+      width: 100px;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
       position: relative;
       overflow: hidden;
     }
@@ -110,36 +195,71 @@
 
     #sound-level-threshold {
       position: absolute;
-      top: -2px;
-      bottom: -2px;
+      top: -1px;
+      bottom: -1px;
       width: 2px;
       background: #fff;
       border-radius: 1px;
-    }
-
-    #sound-level-max {
-      position: absolute;
-      top: -2px;
-      bottom: -2px;
-      width: 2px;
-      background: #ffeb3b;
-      border-radius: 1px;
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
     input[type="range"] {
-      width: 100px;
-      accent-color: #f39200;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      outline: none;
       cursor: pointer;
     }
 
-    #level-display, #sensitivity-display, #gain-display, #max-offset-display, #speed-min-display, #speed-max-display {
-      min-width: 30px;
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f39200;
+      border: 2px solid rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 8px rgba(243,146,0,0.3);
+      margin-top: -5px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 14px rgba(243,146,0,0.5);
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    #level-display, #sensitivity-display, #speed-min-display, #speed-max-display {
+      min-width: 28px;
       text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ddd;
+      font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
 <body>
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">MELISSA COCO</a>
+      <div class="nav-links">
+        <a href="../index.html#works" data-it="Lavori" data-en="Works">Works</a>
+        <a href="../index.html#about" data-it="About" data-en="About">About</a>
+        <a href="../index.html#contact" data-it="Contatti" data-en="Contact">Contact</a>
+      </div>
+      <button id="lang-toggle" data-it="EN" data-en="IT">EN</button>
+    </div>
+  </nav>
   <div id="app">
     <div id="pinwheel-container">
       <svg id="girandola" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595.28 841.89">
@@ -181,34 +301,23 @@
         <div id="sound-level">
           <div id="sound-level-fill"></div>
           <div id="sound-level-threshold"></div>
-          <div id="sound-level-max"></div>
         </div>
         <span id="level-display">0</span>
       </div>
       <div class="control-group">
-        <label for="sensitivity">🔈 Soglia</label>
-        <input type="range" id="sensitivity" min="1" max="80" value="30">
-        <span id="sensitivity-display">30</span>
+        <label for="sensitivity" data-it="🔈 Sensibilità" data-en="🔈 Sensitivity">🔈 Sensibilità</label>
+        <input type="range" id="sensitivity" min="1" max="100" value="90">
+        <span id="sensitivity-display">90</span>
       </div>
       <div class="control-group">
-        <label for="gain">📢 Guadagno</label>
-        <input type="range" id="gain" min="25" max="200" value="150" step="5">
-        <span id="gain-display">150%</span>
+        <label for="speed-min" data-it="🔉 Volume basso" data-en="🔉 Low volume">🔉 Volume basso</label>
+        <input type="range" id="speed-min" min="500" max="5000" value="900" step="100">
+        <span id="speed-min-display">0.9s</span>
       </div>
       <div class="control-group">
-        <label for="max-offset">🎯 Massimo</label>
-        <input type="range" id="max-offset" min="0" max="150" value="60" step="5">
-        <span id="max-offset-display">60</span>
-      </div>
-      <div class="control-group">
-        <label for="speed-min">🔉 Volume basso</label>
-        <input type="range" id="speed-min" min="500" max="5000" value="3000" step="100">
-        <span id="speed-min-display">3.0s</span>
-      </div>
-      <div class="control-group">
-        <label for="speed-max">🔊 Volume alto</label>
-        <input type="range" id="speed-max" min="100" max="3000" value="500" step="100">
-        <span id="speed-max-display">0.5s</span>
+        <label for="speed-max" data-it="🔊 Volume alto" data-en="🔊 High volume">🔊 Volume alto</label>
+        <input type="range" id="speed-max" min="100" max="3000" value="100" step="100">
+        <span id="speed-max-display">0.1s</span>
       </div>
     </div>
   </div>
@@ -221,17 +330,17 @@
     let isListening = false;
     let isSoundActive = false;
 
-    const SENSITIVITY_DEFAULT = 30;
-    const GAIN_DEFAULT = 150;
-    const MAX_OFFSET_DEFAULT = 60;
+    const SENSITIVITY_DEFAULT = 90;
     const SILENCE_FRAMES = 8;
     const LERP_SPEED = 0.1;
+    const langDict = {
+      it: { micIdle: '🎤 Avvia microfono', micActive: '🟢 In ascolto', micError: 'Impossibile accedere al microfono. Verifica i permessi.' },
+      en: { micIdle: '🎤 Start microphone', micActive: '🟢 Listening', micError: 'Cannot access microphone. Check permissions.' },
+    };
     let silenceCounter = 0;
     let sensitivity = SENSITIVITY_DEFAULT;
-    let gain = GAIN_DEFAULT;
-    let maxOffset = MAX_OFFSET_DEFAULT;
-    let speedMinMs = 3000;
-    let speedMaxMs = 500;
+    let speedMinMs = 900;
+    let speedMaxMs = 100;
     let smoothDuration = 2000;
 
     const COLORS = {
@@ -356,11 +465,11 @@
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         isListening = true;
         document.getElementById('mic-btn').classList.add('active');
-        document.getElementById('mic-btn').textContent = '🟢 In ascolto';
+        document.getElementById('mic-btn').textContent = langDict[lang].micActive;
         analyzeLoop();
       } catch (err) {
         console.error('Microfono non disponibile:', err);
-        alert('Impossibile accedere al microfono. Verifica i permessi.');
+        alert(langDict[lang].micError);
       }
     }
 
@@ -377,16 +486,14 @@
       stream = null;
       isListening = false;
       document.getElementById('mic-btn').classList.remove('active');
-      document.getElementById('mic-btn').textContent = '🎤 Avvia microfono';
+      document.getElementById('mic-btn').textContent = langDict[lang].micIdle;
       setNoSound();
     }
 
-    function mapAmplitudeToSpeed(level, threshold255, maxOffset255) {
-      const effectiveMax = 255 - maxOffset255;
-      const range = effectiveMax - threshold255;
+    function mapAmplitudeToSpeed(level, threshold255) {
+      const range = 255 - threshold255;
       if (range <= 0) return speedMaxMs;
-      const excess = Math.max(0, level - threshold255);
-      const t = Math.min(excess / range, 1);
+      const t = Math.min(Math.max(0, level - threshold255) / range, 1);
       return speedMinMs + t * (speedMaxMs - speedMinMs);
     }
 
@@ -400,21 +507,21 @@
       }
       const level = sum / dataArray.length;
 
-      const gainLevel = Math.min(255, level * (gain / 100));
+      const threshold255 = Math.max(3, 255 - sensitivity * 2.5);
 
       const fill = document.getElementById('sound-level-fill');
-      fill.style.width = Math.min(100, (gainLevel / 255) * 100) + '%';
+      fill.style.width = Math.min(100, (level / 255) * 100) + '%';
 
-      document.getElementById('level-display').textContent = Math.round((gainLevel / 255) * 100);
+      document.getElementById('level-display').textContent = Math.round((level / 255) * 100);
 
-      if (gainLevel > (sensitivity / 100) * 255) {
+      if (level > threshold255) {
         silenceCounter = 0;
         if (!isSoundActive) {
           isSoundActive = true;
           setSound();
         }
         if (isSoundActive) {
-          const target = mapAmplitudeToSpeed(gainLevel, (sensitivity / 100) * 255, (maxOffset / 100) * 255);
+          const target = mapAmplitudeToSpeed(level, threshold255);
           smoothDuration += (target - smoothDuration) * LERP_SPEED;
           spinLayer.style.animationDuration = Math.round(smoothDuration) + 'ms';
         }
@@ -440,7 +547,8 @@
     document.getElementById('sensitivity').addEventListener('input', (e) => {
       sensitivity = parseInt(e.target.value);
       document.getElementById('sensitivity-display').textContent = sensitivity;
-      document.getElementById('sound-level-threshold').style.left = sensitivity + '%';
+      const thresholdPct = Math.max(1, (100 - sensitivity * 2.5 / 2.55));
+      document.getElementById('sound-level-threshold').style.left = thresholdPct + '%';
     });
 
     document.getElementById('speed-min').addEventListener('input', (e) => {
@@ -453,24 +561,31 @@
       document.getElementById('speed-max-display').textContent = (speedMaxMs / 1000).toFixed(1) + 's';
     });
 
-    document.getElementById('gain').addEventListener('input', (e) => {
-      gain = parseInt(e.target.value);
-      document.getElementById('gain-display').textContent = gain + '%';
-    });
+    const initThresholdPct = Math.max(1, (100 - SENSITIVITY_DEFAULT * 2.5 / 2.55));
+    document.getElementById('sound-level-threshold').style.left = initThresholdPct + '%';
 
-    function updateMaxLine() {
-      const pos = ((255 - maxOffset) / 255) * 100;
-      document.getElementById('sound-level-max').style.left = pos + '%';
+    let lang = localStorage.getItem('lang') || 'it';
+
+    function applyLang(l) {
+      lang = l;
+      localStorage.setItem('lang', l);
+      document.querySelectorAll('[data-it],[data-en]').forEach(el => {
+        if (el.dataset[l]) el.textContent = el.dataset[l];
+      });
+      document.getElementById('lang-toggle').textContent = l === 'it' ? 'EN' : 'IT';
+      const btn = document.getElementById('mic-btn');
+      if (btn.classList.contains('active')) {
+        btn.textContent = langDict[l].micActive;
+      } else {
+        btn.textContent = langDict[l].micIdle;
+      }
     }
 
-    document.getElementById('max-offset').addEventListener('input', (e) => {
-      maxOffset = parseInt(e.target.value);
-      document.getElementById('max-offset-display').textContent = maxOffset;
-      updateMaxLine();
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      applyLang(lang === 'it' ? 'en' : 'it');
     });
 
-    document.getElementById('sound-level-threshold').style.left = '30%';
-    updateMaxLine();
+    applyLang(lang);
   </script>
 </body>
 </html>

@@ -12,11 +12,10 @@
     body { overflow: hidden; height: 100vh; }
     #project-frame {
       width: 100vw;
-      height: calc(100vh - 110px);
+      height: calc(100vh - 60px);
       border: none;
       display: block;
     }
-    footer { position: relative; z-index: 1; }
   </style>
 </head>
 <body>
@@ -24,15 +23,27 @@
     <div class="nav-inner">
       <a href="../index.html" class="nav-logo">MELISSA COCO</a>
       <div class="nav-links">
-        <a href="../index.html#works">Works</a>
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#contact">Contact</a>
+        <a href="../index.html#works" data-it="Lavori" data-en="Works">Works</a>
+        <a href="../index.html#about" data-it="About" data-en="About">About</a>
+        <a href="../index.html#contact" data-it="Contatti" data-en="Contact">Contact</a>
       </div>
+      <button id="lang-toggle" data-it="EN" data-en="IT">EN</button>
     </div>
   </nav>
   <iframe id="project-frame" src="../Manionetta%20bolle/index.html" allow="camera; microphone"></iframe>
-  <footer>
-    <p>&copy; 2025 Melissa Coco — WS Interaction Design &amp; AI</p>
-  </footer>
+  <script>
+    const langBtn = document.getElementById('lang-toggle')
+    let lang = localStorage.getItem('lang') || 'it'
+    function applyLang(l) {
+      lang = l
+      localStorage.setItem('lang', l)
+      document.querySelectorAll('[data-it],[data-en]').forEach(el => {
+        if (el.dataset[l]) el.textContent = el.dataset[l]
+      })
+      langBtn.textContent = l === 'it' ? 'EN' : 'IT'
+    }
+    langBtn.addEventListener('click', () => { applyLang(lang === 'it' ? 'en' : 'it') })
+    applyLang(lang)
+  </script>
 </body>
 </html>
