@@ -12,7 +12,7 @@ const state = {
   noiseIntensity: 0.45,
   speed: 3.7,
   bgEnabled: true,
-  bgColor: '#0f0f23',
+  bgColor: '#0a0a0a',
   paused: false,
 }
 
