@@ -304,7 +304,6 @@ h1::after {
   border: 1px solid rgba(255,255,255,0.1);
   width: calc((100% - 48px) / 3);
   aspect-ratio: 3 / 2;
-  animation: glitchCard 4s infinite;
 }
 
 .works-card::before,
@@ -316,65 +315,44 @@ h1::after {
   pointer-events: none;
   mix-blend-mode: screen;
   opacity: 0;
-}
-
-.works-card::before {
-  background: rgba(255,0,0,0.4);
-  animation: glitchRed 4s infinite;
-}
-
-.works-card::after {
-  background: rgba(0,200,255,0.4);
-  animation: glitchCyan 4s infinite 0.02s;
-}
-
-.works-card::before,
-.works-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.2s;
 }
 
 .works-card:hover::before {
   opacity: 1;
   background: rgba(255,0,0,0.4);
-  animation: glitchRed 4s infinite;
+  animation: glitchRed 0.6s ease infinite;
 }
 
 .works-card:hover::after {
   opacity: 1;
   background: rgba(0,200,255,0.4);
-  animation: glitchCyan 4s infinite 0.02s;
+  animation: glitchCyan 0.6s ease infinite 0.02s;
 }
 
-.works-card:nth-child(2)::before { animation-duration: 3.5s; }
-.works-card:nth-child(2)::after { animation-duration: 3.5s; }
-.works-card:nth-child(3)::before { animation-duration: 4.5s; }
-.works-card:nth-child(3)::after { animation-duration: 4.5s; }
-.works-card:nth-child(4)::before { animation-duration: 3s; }
-.works-card:nth-child(4)::after { animation-duration: 3s; }
-.works-card:nth-child(5)::before { animation-duration: 5s; }
-.works-card:nth-child(5)::after { animation-duration: 5s; }
+.works-card:nth-child(2):hover::before,
+.works-card:nth-child(2):hover::after { animation-duration: 0.5s; }
+.works-card:nth-child(3):hover::before,
+.works-card:nth-child(3):hover::after { animation-duration: 0.7s; }
+.works-card:nth-child(4):hover::before,
+.works-card:nth-child(4):hover::after { animation-duration: 0.4s; }
+.works-card:nth-child(5):hover::before,
+.works-card:nth-child(5):hover::after { animation-duration: 0.8s; }
 
 @keyframes glitchRed {
-  0%, 88%, 100% { opacity: 0; transform: translate(0); }
-  89% { opacity: 1; transform: translate(-4px, 1px); }
-  91% { opacity: 1; transform: translate(3px, -1px); }
-  93% { opacity: 1; transform: translate(-2px, 0); }
-  95% { opacity: 1; transform: translate(0); }
+  0%, 10%, 100% { opacity: 0; transform: translate(0); }
+  12% { opacity: 1; transform: translate(-4px, 1px); }
+  16% { opacity: 1; transform: translate(3px, -1px); }
+  20% { opacity: 1; transform: translate(-2px, 0); }
+  25% { opacity: 1; transform: translate(0); }
 }
 
 @keyframes glitchCyan {
-  0%, 88%, 100% { opacity: 0; transform: translate(0); }
-  89% { opacity: 1; transform: translate(4px, -1px); }
-  91% { opacity: 1; transform: translate(-3px, 1px); }
-  93% { opacity: 1; transform: translate(2px, 0); }
-  95% { opacity: 1; transform: translate(0); }
+  0%, 10%, 100% { opacity: 0; transform: translate(0); }
+  12% { opacity: 1; transform: translate(4px, -1px); }
+  16% { opacity: 1; transform: translate(-3px, 1px); }
+  20% { opacity: 1; transform: translate(2px, 0); }
+  25% { opacity: 1; transform: translate(0); }
 }
 
 .works-card:nth-child(2) { animation-duration: 4.5s; }
@@ -392,6 +370,11 @@ h1::after {
 
 .works-card-info {
   animation: glitchText 4s infinite;
+  animation-play-state: paused;
+}
+
+.works-card:hover .works-card-info {
+  animation-play-state: running;
 }
 
 .works-card:nth-child(2) .works-card-info { animation-duration: 4.5s; }
@@ -425,7 +408,7 @@ h1::after {
 }
 
 .works-card-info h3 {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 400;
 }
 
